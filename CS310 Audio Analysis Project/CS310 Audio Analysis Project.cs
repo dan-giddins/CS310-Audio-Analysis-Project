@@ -7,23 +7,30 @@ namespace CS310_Audio_Analysis_Project
 {
     public partial class MainForm : Form
     {
+        private const int SAMPLE_RATE = 44100;
+        private const int BUFFER_SIZE = 1024;
+        private const int BIT_DEPTH = 16;
+        private const int BYTES_PER_SAMPLE = BIT_DEPTH / 8;
         private WaveIn waveIn;
         private BufferedWaveProvider bufferedWaveProvider;
         private int currentDevice;
-        private int[] values = new int[0];
-        private const int SAMPLE_RATE = 44100;
-        private const int BUFFER_SIZE = 1024;
+        private int[] values;
+        private int frameSize;
+        private byte[] frameArray;
 
         public MainForm()
         {
             InitializeComponent();
+            waveIn = new WaveIn();
             updateAudioDevices();
+            values = new int[picWaveform.Width];
+            frameSize = values.Length * BYTES_PER_SAMPLE;
+            frameArray = new byte[frameSize];
             test();
         }
 
         private void test()
         {
-            tmrLabel.Enabled = false;
             //create a WaveIn object
             waveIn = new WaveIn();
             waveIn.DeviceNumber = currentDevice;
@@ -31,10 +38,17 @@ namespace CS310_Audio_Analysis_Project
             //create a wave buffer and start the recording
             waveIn.DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable);
             bufferedWaveProvider = new BufferedWaveProvider(waveIn.WaveFormat);
-            bufferedWaveProvider.BufferLength = BUFFER_SIZE * 2;
+            bufferedWaveProvider.BufferLength = values.Length * BYTES_PER_SAMPLE * 2;
             bufferedWaveProvider.DiscardOnBufferOverflow = true;
+            bufferedWaveProvider.ReadFully = false;
             waveIn.StartRecording();
             tmrLabel.Enabled = true;
+        }
+
+        private void stopTest()
+        {
+            tmrLabel.Enabled = false;
+            waveIn.StopRecording();
         }
 
         //add data to the audio recording buffer
@@ -60,28 +74,27 @@ namespace CS310_Audio_Analysis_Project
         {
             tmrLabel.Enabled = false;
             //read the bytes from the stream
-            const int BIT_DEPTH = 16;
-            const int BYTES_PER_SAMPLE = BIT_DEPTH / 8;
-            values = new int[panWaveform.Width];
-            int frameSize = values.Length * BYTES_PER_SAMPLE;
-            byte[] frameArray = new byte[frameSize];
             bufferedWaveProvider.Read(frameArray, 0, frameArray.Length);
             for (int i = 0; i < values.Length; i++)
             {
                 values[i] = (frameArray[i * 2 + 1] << 8) | frameArray[i * 2];
             }
-            panWaveform.Invalidate();
+            picWaveform.Invalidate();
             tmrLabel.Enabled = true;
         }
 
-        private void panWaveform_Paint(object sender, PaintEventArgs e)
+        private void picWaveform_Paint(object sender, PaintEventArgs e)
         {
-            var bitmap = new Bitmap(panWaveform.Width, panWaveform.Height);
-            var graphics = Graphics.FromImage(bitmap);
+            if (picWaveform.Image != null)
+            {
+                picWaveform.Image.Dispose();
+            }
+            Bitmap bitmap = new Bitmap(picWaveform.Width, picWaveform.Height);
+            Graphics graphics = Graphics.FromImage(bitmap);
             int overFlow = (int)Math.Pow(2, 15);
             int yPosOld = 0;
             int yPosNew = 0;
-            double yScale = panWaveform.Height / Math.Pow(2, 16);
+            double yScale = (picWaveform.Height - 1) / Math.Pow(2, 16);
             for (int i = 0; i < values.Length; i++)
             {
                 yPosOld = yPosNew;
@@ -120,6 +133,7 @@ namespace CS310_Audio_Analysis_Project
 
         private void btnTest_Click(object sender, EventArgs e)
         {
+            stopTest();
             test();
         }
     }

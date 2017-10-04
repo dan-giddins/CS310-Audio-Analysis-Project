@@ -34,14 +34,15 @@
             this.boxDevices = new System.Windows.Forms.ComboBox();
             this.btnRefresh = new System.Windows.Forms.Button();
             this.lblDevices = new System.Windows.Forms.Label();
-            this.panWaveform = new System.Windows.Forms.Panel();
+            this.picWaveform = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.picWaveform)).BeginInit();
             this.SuspendLayout();
             // 
             // btnReset
             // 
-            this.btnReset.Location = new System.Drawing.Point(12, 426);
+            this.btnReset.Location = new System.Drawing.Point(12, 517);
             this.btnReset.Name = "btnReset";
-            this.btnReset.Size = new System.Drawing.Size(532, 23);
+            this.btnReset.Size = new System.Drawing.Size(786, 23);
             this.btnReset.TabIndex = 1;
             this.btnReset.Text = "Refresh Input";
             this.btnReset.UseVisualStyleBackColor = true;
@@ -49,7 +50,7 @@
             // 
             // tmrLabel
             // 
-            this.tmrLabel.Interval = 10;
+            this.tmrLabel.Interval = 1;
             this.tmrLabel.Tick += new System.EventHandler(this.tmrLabel_Tick);
             // 
             // boxDevices
@@ -80,20 +81,21 @@
             this.lblDevices.TabIndex = 4;
             this.lblDevices.Text = "Input Device:";
             // 
-            // panWaveform
+            // picWaveform
             // 
-            this.panWaveform.Location = new System.Drawing.Point(12, 41);
-            this.panWaveform.Name = "panWaveform";
-            this.panWaveform.Size = new System.Drawing.Size(532, 379);
-            this.panWaveform.TabIndex = 5;
-            this.panWaveform.Paint += new System.Windows.Forms.PaintEventHandler(this.panWaveform_Paint);
+            this.picWaveform.Location = new System.Drawing.Point(15, 41);
+            this.picWaveform.Name = "picWaveform";
+            this.picWaveform.Size = new System.Drawing.Size(783, 470);
+            this.picWaveform.TabIndex = 5;
+            this.picWaveform.TabStop = false;
+            this.picWaveform.Paint += new System.Windows.Forms.PaintEventHandler(this.picWaveform_Paint);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(556, 461);
-            this.Controls.Add(this.panWaveform);
+            this.ClientSize = new System.Drawing.Size(816, 552);
+            this.Controls.Add(this.picWaveform);
             this.Controls.Add(this.lblDevices);
             this.Controls.Add(this.btnRefresh);
             this.Controls.Add(this.boxDevices);
@@ -101,6 +103,7 @@
             this.DoubleBuffered = true;
             this.Name = "MainForm";
             this.Text = "CS310 Audio Analysis Project";
+            ((System.ComponentModel.ISupportInitialize)(this.picWaveform)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -112,7 +115,7 @@
         private System.Windows.Forms.ComboBox boxDevices;
         private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.Label lblDevices;
-        private System.Windows.Forms.Panel panWaveform;
+        private System.Windows.Forms.PictureBox picWaveform;
     }
 }
 
