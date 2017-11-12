@@ -9,110 +9,236 @@ namespace CS310_Audio_Analysis_Project
     {
         private const int SAMPLE_RATE = 44100;
         private const int BUFFER_SIZE = 1024;
-        private const int BIT_DEPTH = 16;
+        private const byte BIT_DEPTH = 16;
         private const int BYTES_PER_SAMPLE = BIT_DEPTH / 8;
-        private WaveIn waveIn;
-        private BufferedWaveProvider bufferedWaveProvider;
-        private int currentDevice;
-        private int[] values;
-        private int frameSize;
-        private byte[] frameArray;
+        private const byte INPUTS = 4;
+        private WaveIn[] waveIn;
+        private BufferedWaveProvider[] bufferedWaveProvider;
+        private int[] currentDevice;
+        private int[][] values;
+        private byte[][] frameArray;
+        private PictureBox[] picWaveform;
+        private ComboBox[] boxDevices;
+        private bool[] recording;
+        private bool allowRecording = false;
 
         public MainForm()
         {
             InitializeComponent();
-            waveIn = new WaveIn();
+            generateArrays();
             updateAudioDevices();
-            values = new int[picWaveform.Width];
-            frameSize = values.Length * BYTES_PER_SAMPLE;
-            frameArray = new byte[frameSize];
-            test();
+            displayDevices();
+            allowRecording = true;
+            for (byte i = 0; i < INPUTS; i++)
+            {
+                updateDeviceSelection(i);
+                if (recording[i])
+                {
+                    try
+                    {
+                        waveIn[i].StartRecording();
+                    } catch (System.InvalidOperationException e) {
+                        Console.Out.WriteLine(i + " - " + e.Message);
+                    }
+                }
+            }
+            
+        }
+
+        private void displayDevices()
+        {
+            for (byte i = 0; i < INPUTS; i++)
+            {
+                try
+                {
+                    boxDevices[i].SelectedIndex = i;
+                    boxDevices[i].SelectedItem = boxDevices[i].Items[boxDevices[i].SelectedIndex];
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    boxDevices[i].SelectedIndex = -1;
+                }
+                updateDeviceSelection(i);
+            }
+        }
+
+        private void generateArrays()
+        {
+            waveIn = new WaveIn[INPUTS];
+            values = new int[INPUTS][];
+            picWaveform = new PictureBox[INPUTS];
+            picWaveform[0] = picWaveform0;
+            picWaveform[1] = picWaveform1;
+            picWaveform[2] = picWaveform2;
+            picWaveform[3] = picWaveform3;
+            frameArray = new byte[INPUTS][];
+            for (int i = 0; i < INPUTS; i++)
+            {
+                waveIn[i] = new WaveIn();
+                values[i] = new int[picWaveform[i].Width];
+                frameArray[i] = new byte[picWaveform[i].Width * BYTES_PER_SAMPLE];
+            }
+            boxDevices = new ComboBox[INPUTS];
+            boxDevices[0] = boxDevices0;
+            boxDevices[1] = boxDevices1;
+            boxDevices[2] = boxDevices2;
+            boxDevices[3] = boxDevices3;
+            bufferedWaveProvider = new BufferedWaveProvider[INPUTS];
+            currentDevice = new int[INPUTS];
+            recording = new bool[4];
         }
 
         private void test()
         {
-            //create a WaveIn object
-            waveIn = new WaveIn();
-            waveIn.DeviceNumber = currentDevice;
-            waveIn.WaveFormat = new WaveFormat(SAMPLE_RATE, 1);
-            //create a wave buffer and start the recording
-            waveIn.DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable);
-            bufferedWaveProvider = new BufferedWaveProvider(waveIn.WaveFormat);
-            bufferedWaveProvider.BufferLength = values.Length * BYTES_PER_SAMPLE * 2;
-            bufferedWaveProvider.DiscardOnBufferOverflow = true;
-            bufferedWaveProvider.ReadFully = false;
-            waveIn.StartRecording();
+            for (byte i = 0; i < INPUTS; i++)
+            {
+                configWaveIn(i);
+            }
+            waveIn[0].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable0);
+            waveIn[1].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable1);
+            waveIn[2].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable2);
+            waveIn[3].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable3);
+            for (int i = 0; i < INPUTS; i++)
+            {
+                configWaveBuffer(i);
+            }
             tmrLabel.Enabled = true;
+        }
+
+        private void configWaveBuffer(int i)
+        {
+            //create a wave buffer and start the recording
+            bufferedWaveProvider[i] = new BufferedWaveProvider(waveIn[i].WaveFormat);
+            bufferedWaveProvider[i].BufferLength = values[i].Length * BYTES_PER_SAMPLE * 2;
+            bufferedWaveProvider[i].DiscardOnBufferOverflow = true;
+            bufferedWaveProvider[i].ReadFully = false;
+            if (!recording[i] && currentDevice[i] > -1)
+            {
+                try
+                {
+                    waveIn[i].StartRecording();
+                }
+                catch (System.InvalidOperationException e)
+                {
+                    Console.Out.WriteLine(i + " - " + e.Message);
+                }
+                recording[i] = true;
+            }
+        }
+
+        private void configWaveIn(int i)
+        {
+            if (currentDevice[i] > -1)
+            {
+                waveIn[i].DeviceNumber = currentDevice[i];
+            }
+            waveIn[i].WaveFormat = new WaveFormat(SAMPLE_RATE, 1);
         }
 
         private void stopTest()
         {
             tmrLabel.Enabled = false;
-            waveIn.StopRecording();
+            for (int i = 0; i < INPUTS; i++)
+            {
+                if (recording[i])
+                {
+                    waveIn[i].StopRecording();
+                    recording[i] = false;
+                }
+            }
         }
 
         //add data to the audio recording buffer
-        private void waveInDataAvailable(object sender, WaveInEventArgs e)
+        private void waveInDataAvailable0(object sender, WaveInEventArgs e)
         {
-            bufferedWaveProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
+            bufferedWaveProvider[0].AddSamples(e.Buffer, 0, e.BytesRecorded);
+        }
+
+        private void waveInDataAvailable1(object sender, WaveInEventArgs e)
+        {
+            bufferedWaveProvider[1].AddSamples(e.Buffer, 0, e.BytesRecorded);
+        }
+
+        private void waveInDataAvailable2(object sender, WaveInEventArgs e)
+        {
+            bufferedWaveProvider[2].AddSamples(e.Buffer, 0, e.BytesRecorded);
+        }
+
+        private void waveInDataAvailable3(object sender, WaveInEventArgs e)
+        {
+            bufferedWaveProvider[3].AddSamples(e.Buffer, 0, e.BytesRecorded);
         }
 
         private void updateAudioDevices()
         {
             //get all avaible audio devices
             int deviceCount = WaveIn.DeviceCount;
-            Console.Out.WriteLine("Device Count: " + deviceCount);
-            boxDevices.Items.Clear();
+            boxDevices0.Items.Clear();
+            boxDevices1.Items.Clear();
+            boxDevices2.Items.Clear();
+            boxDevices3.Items.Clear();
             for (int i = 0; i < deviceCount; i++)
             {
                 WaveInCapabilities capabilities = WaveIn.GetCapabilities(i);
-                boxDevices.Items.Add(i + ": " + capabilities.ProductName + ", Channels: " + capabilities.Channels);
+                boxDevices0.Items.Add(i + ": " + capabilities.ProductName + ", Channels: " + capabilities.Channels);
+                boxDevices1.Items.Add(i + ": " + capabilities.ProductName + ", Channels: " + capabilities.Channels);
+                boxDevices2.Items.Add(i + ": " + capabilities.ProductName + ", Channels: " + capabilities.Channels);
+                boxDevices3.Items.Add(i + ": " + capabilities.ProductName + ", Channels: " + capabilities.Channels);
             }
         }
 
         private void draw()
         {
             tmrLabel.Enabled = false;
-            //read the bytes from the stream
-            bufferedWaveProvider.Read(frameArray, 0, frameArray.Length);
-            for (int i = 0; i < values.Length; i++)
+            //read the bytes from the streams
+            for (byte i = 0; i < INPUTS; i++)
             {
-                values[i] = (frameArray[i * 2 + 1] << 8) | frameArray[i * 2];
+                if (currentDevice[i] > -1)
+                {
+                    bufferedWaveProvider[i].Read(frameArray[i], 0, frameArray[i].Length);
+                    for (int j = 0; j < values[i].Length; j++)
+                    {
+                        values[i][j] = (frameArray[i][j * 2 + 1] << 8) | frameArray[i][j * 2];
+                    }
+                    picWaveform[i].Invalidate();
+                }
             }
-            picWaveform.Invalidate();
             tmrLabel.Enabled = true;
         }
 
-        private void picWaveform_Paint(object sender, PaintEventArgs e)
+        private void paint(PaintEventArgs e, int i)
         {
-            if (picWaveform.Image != null)
+            if (currentDevice[i] > -1)
             {
-                picWaveform.Image.Dispose();
+                if (picWaveform[i].Image != null)
+                {
+                    picWaveform[i].Image.Dispose();
+                }
+                Bitmap bitmap = new Bitmap(picWaveform[i].Width, picWaveform[i].Height);
+                Graphics graphics = Graphics.FromImage(bitmap);
+                int overFlow = (int)Math.Pow(2, 15);
+                int yPosOld = 0;
+                int yPosNew = 0;
+                double yScale = (picWaveform[i].Height - 1) / Math.Pow(2, 16);
+                for (int j = 0; j < values[i].Length; j++)
+                {
+                    yPosOld = yPosNew;
+                    if (values[i][j] < overFlow)
+                    {
+                        yPosNew = (int)((overFlow - values[i][j]) * yScale);
+                    }
+                    else
+                    {
+                        yPosNew = (int)((overFlow * 3 - values[i][j]) * yScale);
+                    }
+                    if (j > 1)
+                    {
+                        graphics.DrawLine(Pens.Black, j - 1, yPosOld, j, yPosNew);
+                    }
+                }
+                e.Graphics.DrawImage(bitmap, 0, 0, ClientRectangle, GraphicsUnit.Pixel);
+                graphics.Dispose();
             }
-            Bitmap bitmap = new Bitmap(picWaveform.Width, picWaveform.Height);
-            Graphics graphics = Graphics.FromImage(bitmap);
-            int overFlow = (int)Math.Pow(2, 15);
-            int yPosOld = 0;
-            int yPosNew = 0;
-            double yScale = (picWaveform.Height - 1) / Math.Pow(2, 16);
-            for (int i = 0; i < values.Length; i++)
-            {
-                yPosOld = yPosNew;
-                if (values[i] < overFlow)
-                {
-                    yPosNew = (int)((overFlow - values[i]) * yScale);
-                }
-                else
-                {
-                    yPosNew = (int)((overFlow * 3 - values[i]) * yScale);
-                }
-                if (i > 1)
-                {
-                    graphics.DrawLine(Pens.Black, i - 1, yPosOld, i, yPosNew);
-                }
-            }
-            e.Graphics.DrawImage(bitmap, 0, 0, ClientRectangle, GraphicsUnit.Pixel);
-            graphics.Dispose();
         }
 
         private void tmrLabel_Tick(object sender, EventArgs e)
@@ -122,19 +248,74 @@ namespace CS310_Audio_Analysis_Project
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
-            updateAudioDevices();
+            if (allowRecording)
+            {
+                updateAudioDevices();
+            }  
         }
 
-        private void boxDevices_SelectedIndexChanged(object sender, EventArgs e)
+        private void updateDeviceSelection(byte i)
         {
-            currentDevice = boxDevices.SelectedIndex;
-            Console.Out.WriteLine("Selected device: " + currentDevice);
+            if (allowRecording)
+            {
+                currentDevice[i] = boxDevices[i].SelectedIndex;
+                Console.Out.WriteLine(i + " - selected device: " + currentDevice[i]);
+                stopTest();
+                test();
+            }
         }
 
         private void btnTest_Click(object sender, EventArgs e)
         {
-            stopTest();
-            test();
+            if (allowRecording)
+            {
+                stopTest();
+                test();
+            }
+        }
+
+        private void boxDevices0_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            updateDeviceSelection(0);       
+        }
+
+        private void boxDevices1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            updateDeviceSelection(1);
+        }
+
+        private void boxDevices2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            updateDeviceSelection(2);
+        }
+
+        private void boxDevices3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            updateDeviceSelection(3);
+        }
+
+        private void picWaveform0_Paint(object sender, PaintEventArgs e)
+        {
+            paint(e, 0);
+        }
+
+        private void picWaveform1_Paint(object sender, PaintEventArgs e)
+        {
+            paint(e, 1);
+        }
+
+        private void picWaveform2_Paint(object sender, PaintEventArgs e)
+        {
+            paint(e, 2);
+        }
+
+        private void picWaveform3_Paint(object sender, PaintEventArgs e)
+        {
+            paint(e, 3);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
         }
     }
 }
