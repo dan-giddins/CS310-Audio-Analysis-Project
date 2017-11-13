@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Drawing;
+using NAudio.Wave;
 
 namespace CS310_Audio_Analysis_Project
 {
