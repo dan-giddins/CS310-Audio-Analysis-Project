@@ -98,14 +98,14 @@ namespace CS310_Audio_Analysis_Project
             waveIn[1].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable1);
             waveIn[2].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable2);
             waveIn[3].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable3);
-            for (int i = 0; i < INPUTS; i++)
+            for (byte i = 0; i < INPUTS; i++)
             {
                 configWaveBuffer(i);
             }
             tmrLabel.Enabled = true;
         }
 
-        private void configWaveBuffer(int i)
+        private void configWaveBuffer(byte i)
         {
             //create a wave buffer and start the recording
             bufferedWaveProvider[i] = new BufferedWaveProvider(waveIn[i].WaveFormat);
@@ -121,6 +121,12 @@ namespace CS310_Audio_Analysis_Project
                 catch (System.InvalidOperationException e)
                 {
                     Console.Out.WriteLine(i + " - " + e.Message);
+                }
+                catch (NAudio.MmException)
+                {
+                    Console.Out.WriteLine("Bad device selection");
+                    updateAudioDevices();
+                    updateDeviceSelection(i);
                 }
                 recording[i] = true;
             }
@@ -142,7 +148,14 @@ namespace CS310_Audio_Analysis_Project
             {
                 if (recording[i])
                 {
-                    waveIn[i].StopRecording();
+                    try
+                    {
+                        waveIn[i].StopRecording();
+                    }
+                    catch (NAudio.MmException)
+                    {
+                        // ignore MmException if audio input is disabled
+                    }
                     recording[i] = false;
                 }
             }
