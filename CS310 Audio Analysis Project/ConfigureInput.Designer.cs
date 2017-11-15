@@ -1,6 +1,6 @@
 ﻿namespace CS310_Audio_Analysis_Project
 {
-    partial class MainForm
+    partial class ConfigureInputForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,9 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.btnReset = new System.Windows.Forms.Button();
-            this.tmrLabel = new System.Windows.Forms.Timer(this.components);
             this.btnRefresh = new System.Windows.Forms.Button();
             this.lblDevices = new System.Windows.Forms.Label();
             this.picWaveform0 = new System.Windows.Forms.PictureBox();
@@ -60,11 +58,6 @@
             this.btnReset.Text = "Refresh Input";
             this.btnReset.UseVisualStyleBackColor = true;
             this.btnReset.Click += new System.EventHandler(this.btnTest_Click);
-            // 
-            // tmrLabel
-            // 
-            this.tmrLabel.Interval = 1;
-            this.tmrLabel.Tick += new System.EventHandler(this.tmrLabel_Tick);
             // 
             // btnRefresh
             // 
@@ -194,7 +187,7 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // MainForm
+            // ConfigureInputForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -215,8 +208,8 @@
             this.Controls.Add(this.boxDevices0);
             this.Controls.Add(this.btnReset);
             this.DoubleBuffered = true;
-            this.Name = "MainForm";
-            this.Text = "CS310 Audio Analysis Project";
+            this.Name = "ConfigureInputForm";
+            this.Text = "Configure Input";
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform0)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform2)).EndInit();
@@ -228,7 +221,6 @@
 
         #endregion
         private System.Windows.Forms.Button btnReset;
-        private System.Windows.Forms.Timer tmrLabel;
         private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.Label lblDevices;
         private System.Windows.Forms.PictureBox picWaveform0;

@@ -46,16 +46,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CS310 Audio Analysis Project.cs">
+    <Compile Include="ConfigureInput.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CS310 Audio Analysis Project.Designer.cs">
-      <DependentUpon>CS310 Audio Analysis Project.cs</DependentUpon>
+    <Compile Include="ConfigureInput.Designer.cs">
+      <DependentUpon>ConfigureInput.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="CS310AudioAnalysisProject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="CS310 Audio Analysis Project.resx">
-      <DependentUpon>CS310 Audio Analysis Project.cs</DependentUpon>
+    <EmbeddedResource Include="ConfigureInput.resx">
+      <DependentUpon>ConfigureInput.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -66,7 +66,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <None Include="ClassDiagram1.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
