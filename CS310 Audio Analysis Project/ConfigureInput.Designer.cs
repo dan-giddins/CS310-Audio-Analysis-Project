@@ -42,7 +42,8 @@
             this.boxDevices2 = new System.Windows.Forms.ComboBox();
             this.boxDevices1 = new System.Windows.Forms.ComboBox();
             this.boxDevices0 = new System.Windows.Forms.ComboBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnBreak = new System.Windows.Forms.Button();
+            this.btnFrequencies = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform0)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform2)).BeginInit();
@@ -177,22 +178,33 @@
             this.boxDevices0.TabIndex = 2;
             this.boxDevices0.SelectedIndexChanged += new System.EventHandler(this.boxDevices0_SelectedIndexChanged);
             // 
-            // button1
+            // btnBreak
             // 
-            this.button1.Location = new System.Drawing.Point(12, 518);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 6;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btnBreak.Location = new System.Drawing.Point(12, 518);
+            this.btnBreak.Name = "btnBreak";
+            this.btnBreak.Size = new System.Drawing.Size(400, 23);
+            this.btnBreak.TabIndex = 6;
+            this.btnBreak.Text = "Break";
+            this.btnBreak.UseVisualStyleBackColor = true;
+            this.btnBreak.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // btnFrequencies
+            // 
+            this.btnFrequencies.Location = new System.Drawing.Point(419, 518);
+            this.btnFrequencies.Name = "btnFrequencies";
+            this.btnFrequencies.Size = new System.Drawing.Size(400, 23);
+            this.btnFrequencies.TabIndex = 7;
+            this.btnFrequencies.Text = "Test Frequencies";
+            this.btnFrequencies.UseVisualStyleBackColor = true;
+            this.btnFrequencies.Click += new System.EventHandler(this.btnFrequencies_Click);
             // 
             // ConfigureInputForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1079, 553);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(832, 553);
+            this.Controls.Add(this.btnFrequencies);
+            this.Controls.Add(this.btnBreak);
             this.Controls.Add(this.picWaveform3);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.picWaveform2);
@@ -210,6 +222,7 @@
             this.DoubleBuffered = true;
             this.Name = "ConfigureInputForm";
             this.Text = "Configure Input";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ConfigureInputForm_FormClosed);
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform0)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform2)).EndInit();
@@ -234,7 +247,8 @@
         private System.Windows.Forms.ComboBox boxDevices2;
         private System.Windows.Forms.ComboBox boxDevices1;
         private System.Windows.Forms.ComboBox boxDevices0;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnBreak;
+        private System.Windows.Forms.Button btnFrequencies;
     }
 }
 

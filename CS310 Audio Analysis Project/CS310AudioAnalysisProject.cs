@@ -3,38 +3,49 @@ using System.Windows.Forms;
 using NAudio.Wave;
 using System.Drawing;
 using System.Threading;
+using System.Numerics;
 
 namespace CS310_Audio_Analysis_Project
 {
     static class CS310AudioAnalysisProject
     {
         private const int SAMPLE_RATE = 44100;
-        private const int BUFFER_SIZE = 1024;
+        private static int BUFFER_SIZE = (int) Math.Pow(2, 13);
         private const byte BIT_DEPTH = 16;
         private const int BYTES_PER_SAMPLE = BIT_DEPTH / 8;
         private const byte INPUTS = 4;
         private static WaveInEvent[] waveIn;
         private static BufferedWaveProvider[] bufferedWaveProvider;
         private static int[] currentDevice;
-        private static int[][] values;
+        private static int[][] waveValues;
+        private static double[][] frequencyValues;
         private static byte[][] frameArray;
         private static PictureBox[] picWaveform;
+        private static PictureBox[] picFrequency;
         private static ComboBox[] boxDevices;
         private static bool[] recording;
         private static bool allowRecording = false;
+        private static bool frequencyDrawing = false;
+        private static bool analysis = false;
         private static ConfigureInputForm configureInputForm;
-        private static Thread configureInputThread = new Thread(runConfigureInputForm);
+        private static FrequencyForm frequencyForm;
+        //private static AnalysisForm analysisForm;
+        private static Thread configureInputThread;
+        private static Thread frequencyThread;
+        private static Thread analysisThread;
         private delegate void IntDelegate(int i);
         private delegate void ByteObjectDelegate(byte b, object o);
         private delegate object ByteDelegateReturnObject(byte b);
         private delegate int ByteDelegateReturnInt(byte b);
         private static EventWaitHandle drawHandel = new EventWaitHandle(false, EventResetMode.AutoReset);
+        
 
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            configureInputForm = new ConfigureInputForm(drawHandel);
+            configureInputThread = new Thread(runConfigureInputForm);
+            configureInputForm = new ConfigureInputForm(drawHandel, configureInputThread);
             generateArrays();
             configureInputThread.Start();
             updateAudioDevices();
@@ -45,16 +56,32 @@ namespace CS310_Audio_Analysis_Project
             }
             allowRecording = true;
             test();
-            while (true)
+            stopTest();
+            test();
+            while (allowRecording)
             {
                 drawHandel.WaitOne();
-                draw();
+                drawTest();
+            }
+            if (analysis)
+            {
+                analysisThread = new Thread(runAnalysisForm);
             }
         }
 
         private static void runConfigureInputForm()
         {
             Application.Run(configureInputForm);
+        }
+
+        private static void runFrequencyForm()
+        {
+            Application.Run(frequencyForm);
+        }
+
+        private static void runAnalysisForm()
+        {
+            //Application.Run(analysisForm);
         }
 
         private static void displayDevices()
@@ -127,7 +154,7 @@ namespace CS310_Audio_Analysis_Project
         private static void generateArrays()
         {
             waveIn = new WaveInEvent[INPUTS];
-            values = new int[INPUTS][];
+            waveValues = new int[INPUTS][];
             picWaveform = new PictureBox[INPUTS];
             picWaveform[0] = configureInputForm.getPicWaveform0();
             picWaveform[1] = configureInputForm.getPicWaveform1();
@@ -137,8 +164,8 @@ namespace CS310_Audio_Analysis_Project
             for (int i = 0; i < INPUTS; i++)
             {
                 waveIn[i] = new WaveInEvent();
-                values[i] = new int[picWaveform[i].Width];
-                frameArray[i] = new byte[picWaveform[i].Width * BYTES_PER_SAMPLE];
+                waveValues[i] = new int[BUFFER_SIZE];
+                frameArray[i] = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE];
             }
             boxDevices = new ComboBox[INPUTS];
             boxDevices[0] = configureInputForm.getBoxDevices0();
@@ -148,6 +175,20 @@ namespace CS310_Audio_Analysis_Project
             bufferedWaveProvider = new BufferedWaveProvider[INPUTS];
             currentDevice = new int[INPUTS];
             recording = new bool[4];
+        }
+
+        internal static void generateFrequencyArrays()
+        {
+            frequencyValues = new double[INPUTS][];
+            picFrequency = new PictureBox[INPUTS];
+            picFrequency[0] = frequencyForm.getPicFrequency0();
+            picFrequency[1] = frequencyForm.getPicFrequency1();
+            picFrequency[2] = frequencyForm.getPicFrequency2();
+            picFrequency[3] = frequencyForm.getPicFrequency3();
+            for (int i = 0; i < INPUTS; i++)
+            {
+                frequencyValues[i] = new double[BUFFER_SIZE];
+            }
         }
 
         internal static void test()
@@ -167,11 +208,19 @@ namespace CS310_Audio_Analysis_Project
             configureInputForm.enableTimer();
         }
 
+        internal static void startFrequencyThread()
+        {
+            frequencyThread = new Thread(runFrequencyForm);
+            frequencyForm = new FrequencyForm();
+            generateFrequencyArrays();
+            frequencyThread.Start();
+
+        }
+
         private static void configWaveBuffer(byte i)
         {
-            //create a wave buffer and start the recording
             bufferedWaveProvider[i] = new BufferedWaveProvider(waveIn[i].WaveFormat);
-            bufferedWaveProvider[i].BufferLength = values[i].Length * BYTES_PER_SAMPLE * 2;
+            bufferedWaveProvider[i].BufferLength = BUFFER_SIZE * 2;
             bufferedWaveProvider[i].DiscardOnBufferOverflow = true;
             bufferedWaveProvider[i].ReadFully = false;
             startRecording(i);
@@ -191,6 +240,11 @@ namespace CS310_Audio_Analysis_Project
                     Console.Out.WriteLine(e);
                 }
             }
+        }
+
+        internal static void enableAnalysis()
+        {
+            analysis = true;
         }
 
         private static void configWaveIn(int i)
@@ -249,7 +303,6 @@ namespace CS310_Audio_Analysis_Project
 
         internal static void updateAudioDevices()
         {
-            //get all avaible audio devices
             int deviceCount = WaveIn.DeviceCount;
             for (byte i = 0; i < INPUTS; i++)
             {
@@ -259,58 +312,84 @@ namespace CS310_Audio_Analysis_Project
 
         }
 
-        internal static void draw()
+        internal static void drawTest()
         {
             configureInputForm.disableTimer();
-            //read the bytes from the streams
             for (byte i = 0; i < INPUTS; i++)
             {
                 if (currentDevice[i] > -1)
                 {
                     bufferedWaveProvider[i].Read(frameArray[i], 0, frameArray[i].Length);
-                    for (int j = 0; j < values[i].Length; j++)
+                    for (int j = 0; j < waveValues[i].Length; j++)
                     {
-                        values[i][j] = (frameArray[i][j * 2 + 1] << 8) | frameArray[i][j * 2];
+                        waveValues[i][j] = (frameArray[i][j * 2 + 1] << 8) | frameArray[i][j * 2];
                     }
                     picWaveform[i].Invalidate();
+                    if (frequencyDrawing)
+                    {
+                        frequencyValues[i] = FFT(waveValues[i]);
+                        picFrequency[i].Invalidate();
+                    }
                 }
             }
             configureInputForm.enableTimer();
         }
 
-        internal static void paint(PaintEventArgs e, int i)
+        internal static void paintWaveform(PaintEventArgs e, int i)
         {
-            if (currentDevice[i] > -1)
+            if (picWaveform[i].Image != null)
             {
-                if (picWaveform[i].Image != null)
-                {
-                    picWaveform[i].Image.Dispose();
-                }
-                Bitmap bitmap = new Bitmap(picWaveform[i].Width, picWaveform[i].Height);
-                Graphics graphics = Graphics.FromImage(bitmap);
-                int overFlow = (int)Math.Pow(2, 15);
-                int yPosOld = 0;
-                int yPosNew = 0;
-                double yScale = (picWaveform[i].Height - 1) / Math.Pow(2, 16);
-                for (int j = 0; j < values[i].Length; j++)
-                {
-                    yPosOld = yPosNew;
-                    if (values[i][j] < overFlow)
-                    {
-                        yPosNew = (int)((overFlow - values[i][j]) * yScale);
-                    }
-                    else
-                    {
-                        yPosNew = (int)((overFlow * 3 - values[i][j]) * yScale);
-                    }
-                    if (j > 1)
-                    {
-                        graphics.DrawLine(Pens.Black, j - 1, yPosOld, j, yPosNew);
-                    }
-                }
-                e.Graphics.DrawImage(bitmap, 0, 0, configureInputForm.ClientRectangle, GraphicsUnit.Pixel);
-                graphics.Dispose();
+                picWaveform[i].Image.Dispose();
             }
+            Bitmap bitmap = new Bitmap(picWaveform[i].Width, picWaveform[i].Height);
+            Graphics graphics = Graphics.FromImage(bitmap);
+            int overFlow = (int)Math.Pow(2, 15);
+            int yPosOld = 0;
+            int yPosNew = 0;
+            double yScale = (picWaveform[i].Height - 1) / Math.Pow(2, 16);
+            for (int j = 0; j < waveValues[i].Length; j++)
+            {
+                yPosOld = yPosNew;
+                if (waveValues[i][j] < overFlow)
+                {
+                    yPosNew = (int)((overFlow - waveValues[i][j]) * yScale);
+                }
+                else
+                {
+                    yPosNew = (int)((overFlow * 3 - waveValues[i][j]) * yScale);
+                }
+                if (j > 1)
+                {
+                    graphics.DrawLine(Pens.Black, j - 1, yPosOld, j, yPosNew);
+                }
+            }
+            e.Graphics.DrawImage(bitmap, 0, 0, configureInputForm.ClientRectangle, GraphicsUnit.Pixel);
+            graphics.Dispose();
+        }
+
+        internal static void paintFrequency(PaintEventArgs e, int i)
+        {
+            if (picFrequency[i].Image != null)
+            {
+                picFrequency[i].Image.Dispose();
+            }
+            Bitmap bitmap = new Bitmap(picFrequency[i].Width, picFrequency[i].Height);
+            Graphics graphics = Graphics.FromImage(bitmap);
+            int xScale = 1;
+            int yPosOld = 0;
+            int yPosNew = 0;
+            double yScale = 0.01;
+            for (int j = 0; j < frequencyValues[i].Length / xScale; j++)
+            {
+                yPosOld = yPosNew;
+                yPosNew = (int)(picFrequency[i].Height - frequencyValues[i][j] * yScale);
+                if (j > 1)
+                {
+                    graphics.DrawLine(Pens.Black, (j - 1) * xScale, yPosOld, j * xScale, yPosNew);
+                }
+            }
+            e.Graphics.DrawImage(bitmap, 0, 0, frequencyForm.ClientRectangle, GraphicsUnit.Pixel);
+            graphics.Dispose();
         }
 
         internal static void updateDeviceSelection(byte i)
@@ -340,6 +419,37 @@ namespace CS310_Audio_Analysis_Project
         internal static bool getAllowRecording()
         {
             return allowRecording;
+        }
+
+        internal static void disableRecording()
+        {
+            allowRecording = false;
+        }
+
+        private static double[] FFT(int[] data)
+        {
+            double[] fft = new double[data.Length];
+            Complex[] fftComplex = new Complex[data.Length];
+            for (int i = 0; i < data.Length; i++)
+            {
+                fftComplex[i] = new Complex(data[i], 0.0);
+            }
+            Accord.Math.FourierTransform.FFT(fftComplex, Accord.Math.FourierTransform.Direction.Forward);
+            for (int i = 0; i < data.Length; i++)
+            {
+                fft[i] = fftComplex[i].Magnitude;
+            }
+            return fft;
+        }
+
+        internal static void allowFrequencyDrawing()
+        {
+            frequencyDrawing = true;
+        }
+
+        internal static void disallowFrequencyDrawing()
+        {
+            frequencyDrawing = false;
         }
     }
 }

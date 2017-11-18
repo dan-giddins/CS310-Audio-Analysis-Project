@@ -1,5 +1,6 @@
 ﻿using NAudio.Wave;
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
@@ -12,10 +13,12 @@ namespace CS310_Audio_Analysis_Project
         private delegate int StringDelegateReturnInt(string s);
         private EventWaitHandle drawHandel;
         private System.Timers.Timer timerDraw;
+        private Thread configureInputThread;
 
-        internal ConfigureInputForm(EventWaitHandle drawHandel)
+        internal ConfigureInputForm(EventWaitHandle drawHandel, Thread configureInputThread)
         {
             this.drawHandel = drawHandel;
+            this.configureInputThread = configureInputThread;
             timerDraw = new System.Timers.Timer(15);
             timerDraw.Enabled = false;
             timerDraw.Elapsed += new ElapsedEventHandler(timerDraw_Tick);
@@ -27,16 +30,29 @@ namespace CS310_Audio_Analysis_Project
         {
             if (InvokeRequired)
             {
-                Invoke((MethodInvoker)delegate
+                try
                 {
-                    timerDraw_Tick(sender, e);
-                });
+                    Invoke((MethodInvoker)delegate
+                    {
+                        timerDraw_Tick(sender, e);
+                    });
+                }
+                catch (Exception exception)
+                {
+                    if (exception is ObjectDisposedException || exception is InvalidAsynchronousStateException)
+                    {
+                        Console.Out.WriteLine("Closing Configure Input");
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
             else
             {
                 drawHandel.Set();
             }
-            
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)
@@ -78,22 +94,22 @@ namespace CS310_Audio_Analysis_Project
 
         private void picWaveform0_Paint(object sender, PaintEventArgs e)
         {
-            CS310AudioAnalysisProject.paint(e, 0);
+            CS310AudioAnalysisProject.paintWaveform(e, 0);
         }
 
         private void picWaveform1_Paint(object sender, PaintEventArgs e)
         {
-            CS310AudioAnalysisProject.paint(e, 1);
+            CS310AudioAnalysisProject.paintWaveform(e, 1);
         }
 
         private void picWaveform2_Paint(object sender, PaintEventArgs e)
         {
-            CS310AudioAnalysisProject.paint(e, 2);
+            CS310AudioAnalysisProject.paintWaveform(e, 2);
         }
 
         private void picWaveform3_Paint(object sender, PaintEventArgs e)
         {
-            CS310AudioAnalysisProject.paint(e, 3);
+            CS310AudioAnalysisProject.paintWaveform(e, 3);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -196,6 +212,18 @@ namespace CS310_Audio_Analysis_Project
         internal void disableTimer()
         {
             timerDraw.Enabled = false;
+        }
+
+        private void ConfigureInputForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            CS310AudioAnalysisProject.enableAnalysis();
+            CS310AudioAnalysisProject.disableRecording();
+            drawHandel.Set();
+        }
+
+        private void btnFrequencies_Click(object sender, EventArgs e)
+        {
+            CS310AudioAnalysisProject.startFrequencyThread();
         }
     }
 }
