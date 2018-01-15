@@ -32,6 +32,7 @@
             this.picFrequency2 = new System.Windows.Forms.PictureBox();
             this.picFrequency1 = new System.Windows.Forms.PictureBox();
             this.picFrequency0 = new System.Windows.Forms.PictureBox();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picFrequency3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picFrequency2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picFrequency1)).BeginInit();
@@ -74,11 +75,21 @@
             this.picFrequency0.TabStop = false;
             this.picFrequency0.Paint += new System.Windows.Forms.PaintEventHandler(this.picFrequency0_Paint);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(9, 439);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(35, 13);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "label1";
+            // 
             // FrequencyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(871, 473);
+            this.ClientSize = new System.Drawing.Size(881, 473);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.picFrequency3);
             this.Controls.Add(this.picFrequency2);
             this.Controls.Add(this.picFrequency1);
@@ -91,6 +102,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.picFrequency1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picFrequency0)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
+
         }
 
         #endregion
@@ -99,5 +112,6 @@
         private System.Windows.Forms.PictureBox picFrequency2;
         private System.Windows.Forms.PictureBox picFrequency1;
         private System.Windows.Forms.PictureBox picFrequency0;
+        private System.Windows.Forms.Label label1;
     }
 }

@@ -10,14 +10,14 @@ namespace CS310_Audio_Analysis_Project
     static class CS310AudioAnalysisProject
     {
         private const int SAMPLE_RATE = 44100;
-        private static int BUFFER_SIZE = (int) Math.Pow(2, 13);
+        private static int BUFFER_SIZE = (int) Math.Pow(2, 11);
         private const byte BIT_DEPTH = 16;
         private const int BYTES_PER_SAMPLE = BIT_DEPTH / 8;
         private const byte INPUTS = 4;
         private static WaveInEvent[] waveIn;
         private static BufferedWaveProvider[] bufferedWaveProvider;
         private static int[] currentDevice;
-        private static int[][] waveValues;
+        private static short[][] waveValues;
         private static double[][] frequencyValues;
         private static byte[][] frameArray;
         private static PictureBox[] picWaveform;
@@ -39,7 +39,6 @@ namespace CS310_Audio_Analysis_Project
         private delegate int ByteDelegateReturnInt(byte b);
         private static EventWaitHandle drawHandel = new EventWaitHandle(false, EventResetMode.AutoReset);
         
-
         static void Main()
         {
             Application.EnableVisualStyles();
@@ -55,8 +54,6 @@ namespace CS310_Audio_Analysis_Project
                 updateDeviceSelection(i);
             }
             allowRecording = true;
-            test();
-            stopTest();
             test();
             while (allowRecording)
             {
@@ -154,7 +151,7 @@ namespace CS310_Audio_Analysis_Project
         private static void generateArrays()
         {
             waveIn = new WaveInEvent[INPUTS];
-            waveValues = new int[INPUTS][];
+            waveValues = new short[INPUTS][];
             picWaveform = new PictureBox[INPUTS];
             picWaveform[0] = configureInputForm.getPicWaveform0();
             picWaveform[1] = configureInputForm.getPicWaveform1();
@@ -164,7 +161,7 @@ namespace CS310_Audio_Analysis_Project
             for (int i = 0; i < INPUTS; i++)
             {
                 waveIn[i] = new WaveInEvent();
-                waveValues[i] = new int[BUFFER_SIZE];
+                waveValues[i] = new short[BUFFER_SIZE];
                 frameArray[i] = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE];
             }
             boxDevices = new ComboBox[INPUTS];
@@ -254,6 +251,7 @@ namespace CS310_Audio_Analysis_Project
                 waveIn[i].DeviceNumber = currentDevice[i];
             }
             waveIn[i].WaveFormat = new WaveFormat(SAMPLE_RATE, 1);
+            waveIn[i].BufferMilliseconds = (int)((double)BUFFER_SIZE / SAMPLE_RATE * 1000.0);
         }
 
         internal static void stopTest()
@@ -322,7 +320,7 @@ namespace CS310_Audio_Analysis_Project
                     bufferedWaveProvider[i].Read(frameArray[i], 0, frameArray[i].Length);
                     for (int j = 0; j < waveValues[i].Length; j++)
                     {
-                        waveValues[i][j] = (frameArray[i][j * 2 + 1] << 8) | frameArray[i][j * 2];
+                        waveValues[i][j] = (short) ((frameArray[i][j * 2 + 1] << 8) | frameArray[i][j * 2]);
                     }
                     picWaveform[i].Invalidate();
                     if (frequencyDrawing)
@@ -343,21 +341,13 @@ namespace CS310_Audio_Analysis_Project
             }
             Bitmap bitmap = new Bitmap(picWaveform[i].Width, picWaveform[i].Height);
             Graphics graphics = Graphics.FromImage(bitmap);
-            int overFlow = (int)Math.Pow(2, 15);
-            int yPosOld = 0;
-            int yPosNew = 0;
+            short yPosOld = 0;
+            short yPosNew = 0;
             double yScale = (picWaveform[i].Height - 1) / Math.Pow(2, 16);
-            for (int j = 0; j < waveValues[i].Length; j++)
+            for (int j = 0; j < picWaveform[i].Width; j++)
             {
                 yPosOld = yPosNew;
-                if (waveValues[i][j] < overFlow)
-                {
-                    yPosNew = (int)((overFlow - waveValues[i][j]) * yScale);
-                }
-                else
-                {
-                    yPosNew = (int)((overFlow * 3 - waveValues[i][j]) * yScale);
-                }
+                yPosNew = (short) ((waveValues[i][j]) * yScale + picWaveform[i].Height / 2);
                 if (j > 1)
                 {
                     graphics.DrawLine(Pens.Black, j - 1, yPosOld, j, yPosNew);
@@ -378,8 +368,9 @@ namespace CS310_Audio_Analysis_Project
             int xScale = 1;
             int yPosOld = 0;
             int yPosNew = 0;
-            double yScale = 0.01;
-            for (int j = 0; j < frequencyValues[i].Length / xScale; j++)
+            double yScale = 0.1;
+            frequencyForm.getLable().Text = frequencyValues[2][539].ToString();
+            for (int j = 0; j < picFrequency[i].Width / xScale; j++)
             {
                 yPosOld = yPosNew;
                 yPosNew = (int)(picFrequency[i].Height - frequencyValues[i][j] * yScale);
@@ -426,7 +417,7 @@ namespace CS310_Audio_Analysis_Project
             allowRecording = false;
         }
 
-        private static double[] FFT(int[] data)
+        private static double[] FFT(short[] data)
         {
             double[] fft = new double[data.Length];
             Complex[] fftComplex = new Complex[data.Length];
