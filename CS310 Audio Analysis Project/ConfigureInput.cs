@@ -11,48 +11,12 @@ namespace CS310_Audio_Analysis_Project
     {
         private delegate void VoidDelegate();
         private delegate int StringDelegateReturnInt(string s);
-        private EventWaitHandle drawHandel;
-        private System.Timers.Timer timerDraw;
         private Thread configureInputThread;
 
-        internal ConfigureInputForm(EventWaitHandle drawHandel, Thread configureInputThread)
+        internal ConfigureInputForm(Thread configureInputThread)
         {
-            this.drawHandel = drawHandel;
             this.configureInputThread = configureInputThread;
-            timerDraw = new System.Timers.Timer(15);
-            timerDraw.Enabled = false;
-            timerDraw.Elapsed += new ElapsedEventHandler(timerDraw_Tick);
-            timerDraw.Start();
             InitializeComponent();
-        }
-
-        private void timerDraw_Tick(object sender, EventArgs e)
-        {
-            if (InvokeRequired)
-            {
-                try
-                {
-                    Invoke((MethodInvoker)delegate
-                    {
-                        timerDraw_Tick(sender, e);
-                    });
-                }
-                catch (Exception exception)
-                {
-                    if (exception is ObjectDisposedException || exception is InvalidAsynchronousStateException)
-                    {
-                        Console.Out.WriteLine("Closing Configure Input");
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
-            else
-            {
-                drawHandel.Set();
-            }
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)
@@ -197,21 +161,6 @@ namespace CS310_Audio_Analysis_Project
                 }
                 Invoke(d, new object[] { element });
             }
-        }
-
-        internal void enableTimer()
-        {
-            timerDraw.Enabled = true;
-        }
-
-        internal void disableTimer()
-        {
-            timerDraw.Enabled = false;
-        }
-
-        private void ConfigureInputForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            drawHandel.Set();
         }
 
         private void btnFrequencies_Click(object sender, EventArgs e)

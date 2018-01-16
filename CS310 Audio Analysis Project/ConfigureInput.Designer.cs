@@ -235,7 +235,6 @@
             this.DoubleBuffered = true;
             this.Name = "ConfigureInputForm";
             this.Text = "Configure Input";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ConfigureInputForm_FormClosed);
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform0)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform2)).EndInit();

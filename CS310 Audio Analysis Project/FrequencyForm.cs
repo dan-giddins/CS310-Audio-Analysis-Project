@@ -54,7 +54,5 @@ namespace CS310_Audio_Analysis_Project
         {
             CS310AudioAnalysisProject.paintFrequency(e, 3);
         }
-
-
     }
 }

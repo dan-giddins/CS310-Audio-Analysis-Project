@@ -4,16 +4,17 @@ using NAudio.Wave;
 using System.Drawing;
 using System.Threading;
 using System.Numerics;
+using System.Timers;
 
 namespace CS310_Audio_Analysis_Project
 {
     static class CS310AudioAnalysisProject
     {
         private const int SAMPLE_RATE = 44100;
-        private static int BUFFER_SIZE = (int) Math.Pow(2, 11);
+        internal static int BUFFER_SIZE = (int) Math.Pow(2, 11);
         private const byte BIT_DEPTH = 16;
         private const int BYTES_PER_SAMPLE = BIT_DEPTH / 8;
-        private const byte INPUTS = 4;
+        internal const byte INPUTS = 4;
         private static WaveInEvent[] waveIn = new WaveInEvent[INPUTS];
         private static BufferedWaveProvider[] bufferedWaveProvider = new BufferedWaveProvider[INPUTS];
         private static int[] currentDevice = new int[INPUTS];
@@ -37,16 +38,17 @@ namespace CS310_Audio_Analysis_Project
         private delegate void ByteObjectDelegate(byte b, object o);
         private delegate object ByteDelegateReturnObject(byte b);
         private delegate int ByteDelegateReturnInt(byte b);
-        private static EventWaitHandle drawHandel = new EventWaitHandle(false, EventResetMode.AutoReset);
+        private static EventWaitHandle eventWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
         private static bool readFromFile;
         private static WaveFileReader[] waveFileReader = new WaveFileReader[4];
+        private static System.Timers.Timer timer;
 
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             configureInputThread = new Thread(runConfigureInputForm);
-            configureInputForm = new ConfigureInputForm(drawHandel, configureInputThread);
+            configureInputForm = new ConfigureInputForm(configureInputThread);
             configureArrays();
             configureInputThread.Start();
             updateAudioDevices();
@@ -56,20 +58,39 @@ namespace CS310_Audio_Analysis_Project
                 updateDeviceSelection(i);
             }
             allowRecording = true;
+            timer = new System.Timers.Timer(15);
+            timer.Enabled = false;
+            timer.Elapsed += new ElapsedEventHandler(timer_Tick);
+            timer.Start();
             test();
             while (allowRecording)
             {
-                drawHandel.WaitOne();
+                eventWaitHandle.WaitOne();
                 readData();
                 if (analysis)
                 {
-
+                    if (analysisForm == null)
+                    {
+                        startAnalysisThread();
+                    }
+                    for (byte i = 0; i < INPUTS; i++)
+                    {
+                        if (readFromFile || currentDevice[i] > -1)
+                        {
+                            analysisForm.copyFrequencyData(frequencyValues, i);
+                        }             
+                    }
                 }
                 else
                 {
                     drawTest();
                 }
             }
+        }
+
+        private static void timer_Tick(object sender, ElapsedEventArgs e)
+        {
+            eventWaitHandle.Set();
         }
 
         private static void runConfigureInputForm()
@@ -209,13 +230,12 @@ namespace CS310_Audio_Analysis_Project
             {
                 configWaveBuffer(i);
             }
-            configureInputForm.enableTimer();
+            timer.Enabled = true;
         }
 
         internal static void analyse()
         {
             analysis = true;
-            startAnalysisThread();
         }
 
         internal static void chkReadFileChanged(bool checkState)
@@ -237,7 +257,7 @@ namespace CS310_Audio_Analysis_Project
         internal static void startAnalysisThread()
         {
             analysisThread = new Thread(runAnalysisForm);
-            analysisForm = new AnalysisForm();
+            analysisForm = new AnalysisForm(eventWaitHandle);
             analysisThread.Start();
         }
 
@@ -300,7 +320,7 @@ namespace CS310_Audio_Analysis_Project
 
         internal static void stopTest()
         {
-            configureInputForm.disableTimer();
+            timer.Enabled = false;
             for (byte i = 0; i < INPUTS; i++)
             {
                 stopRecording(i);
@@ -356,7 +376,7 @@ namespace CS310_Audio_Analysis_Project
 
         internal static void drawTest()
         {
-            configureInputForm.disableTimer();
+            timer.Enabled = false;
             for (byte i = 0; i < INPUTS; i++)
             {
                 if (readFromFile || currentDevice[i] > -1)
@@ -368,7 +388,7 @@ namespace CS310_Audio_Analysis_Project
                     }
                 }
             }
-            configureInputForm.enableTimer();
+            timer.Enabled = true;
         }
 
         private static void readData()
