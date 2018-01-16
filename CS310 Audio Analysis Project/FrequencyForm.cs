@@ -10,11 +10,6 @@ namespace CS310_Audio_Analysis_Project
             CS310AudioAnalysisProject.allowFrequencyDrawing();
         }
 
-        internal Label getLable()
-        {
-            return label1;
-        }
-
         internal PictureBox getPicFrequency0()
         {
             return picFrequency0;

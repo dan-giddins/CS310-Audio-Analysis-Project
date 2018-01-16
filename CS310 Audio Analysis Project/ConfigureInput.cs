@@ -112,11 +112,6 @@ namespace CS310_Audio_Analysis_Project
             CS310AudioAnalysisProject.paintWaveform(e, 3);
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            CS310AudioAnalysisProject.breakPoint();
-        }
-
         internal PictureBox getPicWaveform0()
         {
             return picWaveform0;
@@ -216,14 +211,23 @@ namespace CS310_Audio_Analysis_Project
 
         private void ConfigureInputForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            CS310AudioAnalysisProject.enableAnalysis();
-            CS310AudioAnalysisProject.disableRecording();
             drawHandel.Set();
         }
 
         private void btnFrequencies_Click(object sender, EventArgs e)
         {
             CS310AudioAnalysisProject.startFrequencyThread();
+        }
+
+        private void chkReadFile_CheckedChanged(object sender, EventArgs e)
+        {
+            CS310AudioAnalysisProject.chkReadFileChanged(chkReadFile.Checked);
+        }
+
+        private void btnAnalysise_Click(object sender, EventArgs e)
+        {
+            CS310AudioAnalysisProject.analyse();
+            Close();
         }
     }
 }

@@ -14,22 +14,22 @@ namespace CS310_Audio_Analysis_Project
         private const byte BIT_DEPTH = 16;
         private const int BYTES_PER_SAMPLE = BIT_DEPTH / 8;
         private const byte INPUTS = 4;
-        private static WaveInEvent[] waveIn;
-        private static BufferedWaveProvider[] bufferedWaveProvider;
-        private static int[] currentDevice;
-        private static short[][] waveValues;
-        private static double[][] frequencyValues;
-        private static byte[][] frameArray;
-        private static PictureBox[] picWaveform;
-        private static PictureBox[] picFrequency;
-        private static ComboBox[] boxDevices;
-        private static bool[] recording;
+        private static WaveInEvent[] waveIn = new WaveInEvent[INPUTS];
+        private static BufferedWaveProvider[] bufferedWaveProvider = new BufferedWaveProvider[INPUTS];
+        private static int[] currentDevice = new int[INPUTS];
+        private static short[][] waveValues = new short[INPUTS][];
+        private static double[][] frequencyValues = new double[INPUTS][];
+        private static byte[][] frameArray = new byte[INPUTS][];
+        private static PictureBox[] picWaveform = new PictureBox[INPUTS];
+        private static PictureBox[] picFrequency = new PictureBox[INPUTS];
+        private static ComboBox[] boxDevices = new ComboBox[INPUTS];
+        private static bool[] recording = new bool[INPUTS];
         private static bool allowRecording = false;
         private static bool frequencyDrawing = false;
-        private static bool analysis = false;
+        private static bool analysis;
         private static ConfigureInputForm configureInputForm;
         private static FrequencyForm frequencyForm;
-        //private static AnalysisForm analysisForm;
+        private static AnalysisForm analysisForm;
         private static Thread configureInputThread;
         private static Thread frequencyThread;
         private static Thread analysisThread;
@@ -38,14 +38,16 @@ namespace CS310_Audio_Analysis_Project
         private delegate object ByteDelegateReturnObject(byte b);
         private delegate int ByteDelegateReturnInt(byte b);
         private static EventWaitHandle drawHandel = new EventWaitHandle(false, EventResetMode.AutoReset);
-        
+        private static bool readFromFile;
+        private static WaveFileReader[] waveFileReader = new WaveFileReader[4];
+
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             configureInputThread = new Thread(runConfigureInputForm);
             configureInputForm = new ConfigureInputForm(drawHandel, configureInputThread);
-            generateArrays();
+            configureArrays();
             configureInputThread.Start();
             updateAudioDevices();
             displayDevices();
@@ -58,11 +60,15 @@ namespace CS310_Audio_Analysis_Project
             while (allowRecording)
             {
                 drawHandel.WaitOne();
-                drawTest();
-            }
-            if (analysis)
-            {
-                analysisThread = new Thread(runAnalysisForm);
+                readData();
+                if (analysis)
+                {
+
+                }
+                else
+                {
+                    drawTest();
+                }
             }
         }
 
@@ -78,7 +84,7 @@ namespace CS310_Audio_Analysis_Project
 
         private static void runAnalysisForm()
         {
-            //Application.Run(analysisForm);
+            Application.Run(analysisForm);
         }
 
         private static void displayDevices()
@@ -143,41 +149,27 @@ namespace CS310_Audio_Analysis_Project
                 }
             }
         }
-        internal static void breakPoint()
-        {
-            Console.Out.WriteLine("Breaking...");
-        }
 
-        private static void generateArrays()
+        private static void configureArrays()
         {
-            waveIn = new WaveInEvent[INPUTS];
-            waveValues = new short[INPUTS][];
-            picWaveform = new PictureBox[INPUTS];
             picWaveform[0] = configureInputForm.getPicWaveform0();
             picWaveform[1] = configureInputForm.getPicWaveform1();
             picWaveform[2] = configureInputForm.getPicWaveform2();
             picWaveform[3] = configureInputForm.getPicWaveform3();
-            frameArray = new byte[INPUTS][];
             for (int i = 0; i < INPUTS; i++)
             {
                 waveIn[i] = new WaveInEvent();
                 waveValues[i] = new short[BUFFER_SIZE];
                 frameArray[i] = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE];
             }
-            boxDevices = new ComboBox[INPUTS];
             boxDevices[0] = configureInputForm.getBoxDevices0();
             boxDevices[1] = configureInputForm.getBoxDevices1();
             boxDevices[2] = configureInputForm.getBoxDevices2();
             boxDevices[3] = configureInputForm.getBoxDevices3();
-            bufferedWaveProvider = new BufferedWaveProvider[INPUTS];
-            currentDevice = new int[INPUTS];
-            recording = new bool[4];
         }
 
-        internal static void generateFrequencyArrays()
+        internal static void configureFrequencyArrays()
         {
-            frequencyValues = new double[INPUTS][];
-            picFrequency = new PictureBox[INPUTS];
             picFrequency[0] = frequencyForm.getPicFrequency0();
             picFrequency[1] = frequencyForm.getPicFrequency1();
             picFrequency[2] = frequencyForm.getPicFrequency2();
@@ -188,16 +180,31 @@ namespace CS310_Audio_Analysis_Project
             }
         }
 
+        internal static void configureFileArrays()
+        {
+            for (int i = 0; i < INPUTS; i++)
+            {
+                waveFileReader[i] = new WaveFileReader("audio/input.wav");
+            }
+        }
+
         internal static void test()
         {
-            for (byte i = 0; i < INPUTS; i++)
+            if (readFromFile)
             {
-                configWaveIn(i);
+                configureFileArrays();
             }
-            waveIn[0].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable0);
-            waveIn[1].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable1);
-            waveIn[2].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable2);
-            waveIn[3].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable3);
+            else
+            {
+                for (byte i = 0; i < INPUTS; i++)
+                {
+                    configWaveIn(i);
+                }
+                waveIn[0].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable0);
+                waveIn[1].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable1);
+                waveIn[2].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable2);
+                waveIn[3].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable3);
+            }
             for (byte i = 0; i < INPUTS; i++)
             {
                 configWaveBuffer(i);
@@ -205,22 +212,64 @@ namespace CS310_Audio_Analysis_Project
             configureInputForm.enableTimer();
         }
 
+        internal static void analyse()
+        {
+            analysis = true;
+            startAnalysisThread();
+        }
+
+        internal static void chkReadFileChanged(bool checkState)
+        {
+            stopTest();
+            readFromFile = checkState;
+            test();
+        }
+
         internal static void startFrequencyThread()
         {
             frequencyThread = new Thread(runFrequencyForm);
             frequencyForm = new FrequencyForm();
-            generateFrequencyArrays();
+            configureFrequencyArrays();
             frequencyThread.Start();
 
         }
 
+        internal static void startAnalysisThread()
+        {
+            analysisThread = new Thread(runAnalysisForm);
+            analysisForm = new AnalysisForm();
+            analysisThread.Start();
+        }
+
         private static void configWaveBuffer(byte i)
         {
-            bufferedWaveProvider[i] = new BufferedWaveProvider(waveIn[i].WaveFormat);
+            WaveFormat waveFormat;
+            if (readFromFile)
+            {
+                waveFormat = waveFileReader[i].WaveFormat;
+            }
+            else
+            {
+                waveFormat = waveIn[i].WaveFormat;
+            }
+            bufferedWaveProvider[i] = new BufferedWaveProvider(waveFormat);
             bufferedWaveProvider[i].BufferLength = BUFFER_SIZE * 2;
-            bufferedWaveProvider[i].DiscardOnBufferOverflow = true;
             bufferedWaveProvider[i].ReadFully = false;
-            startRecording(i);
+            if (readFromFile)
+            {
+                bufferedWaveProvider[i].DiscardOnBufferOverflow = false;
+                int length = (int) waveFileReader[i].Length;
+                length = BUFFER_SIZE;
+                byte[] tempArray = new byte[length];
+                waveFileReader[i].Read(tempArray, 0, length);
+                bufferedWaveProvider[i].AddSamples(tempArray, 0, length);
+            }
+            else
+            {
+                bufferedWaveProvider[i].DiscardOnBufferOverflow = true;
+                startRecording(i); 
+            }
+            
         }
 
         private static void startRecording(byte i)
@@ -237,11 +286,6 @@ namespace CS310_Audio_Analysis_Project
                     Console.Out.WriteLine(e);
                 }
             }
-        }
-
-        internal static void enableAnalysis()
-        {
-            analysis = true;
         }
 
         private static void configWaveIn(int i)
@@ -315,22 +359,32 @@ namespace CS310_Audio_Analysis_Project
             configureInputForm.disableTimer();
             for (byte i = 0; i < INPUTS; i++)
             {
-                if (currentDevice[i] > -1)
+                if (readFromFile || currentDevice[i] > -1)
                 {
-                    bufferedWaveProvider[i].Read(frameArray[i], 0, frameArray[i].Length);
-                    for (int j = 0; j < waveValues[i].Length; j++)
-                    {
-                        waveValues[i][j] = (short) ((frameArray[i][j * 2 + 1] << 8) | frameArray[i][j * 2]);
-                    }
                     picWaveform[i].Invalidate();
                     if (frequencyDrawing)
                     {
-                        frequencyValues[i] = FFT(waveValues[i]);
                         picFrequency[i].Invalidate();
                     }
                 }
             }
             configureInputForm.enableTimer();
+        }
+
+        private static void readData()
+        {
+            for (byte i = 0; i < INPUTS; i++)
+            {
+                if (readFromFile || currentDevice[i] > -1)
+                {
+                    bufferedWaveProvider[i].Read(frameArray[i], 0, frameArray[i].Length);
+                    for (int j = 0; j < waveValues[i].Length; j++)
+                    {
+                        waveValues[i][j] = (short)((frameArray[i][j * 2 + 1] << 8) | frameArray[i][j * 2]);
+                    }
+                    frequencyValues[i] = FFT(waveValues[i]);
+                }
+            }
         }
 
         internal static void paintWaveform(PaintEventArgs e, int i)
@@ -369,7 +423,6 @@ namespace CS310_Audio_Analysis_Project
             int yPosOld = 0;
             int yPosNew = 0;
             double yScale = 0.1;
-            frequencyForm.getLable().Text = frequencyValues[2][539].ToString();
             for (int j = 0; j < picFrequency[i].Width / xScale; j++)
             {
                 yPosOld = yPosNew;
