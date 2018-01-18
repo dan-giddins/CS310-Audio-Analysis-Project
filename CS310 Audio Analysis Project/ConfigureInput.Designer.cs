@@ -82,6 +82,7 @@
             // 
             // picWaveform0
             // 
+            this.picWaveform0.BackColor = System.Drawing.Color.White;
             this.picWaveform0.Location = new System.Drawing.Point(12, 40);
             this.picWaveform0.Name = "picWaveform0";
             this.picWaveform0.Size = new System.Drawing.Size(400, 200);
@@ -100,6 +101,7 @@
             // 
             // picWaveform1
             // 
+            this.picWaveform1.BackColor = System.Drawing.Color.White;
             this.picWaveform1.Location = new System.Drawing.Point(419, 40);
             this.picWaveform1.Name = "picWaveform1";
             this.picWaveform1.Size = new System.Drawing.Size(400, 200);
@@ -118,6 +120,7 @@
             // 
             // picWaveform2
             // 
+            this.picWaveform2.BackColor = System.Drawing.Color.White;
             this.picWaveform2.Location = new System.Drawing.Point(12, 282);
             this.picWaveform2.Name = "picWaveform2";
             this.picWaveform2.Size = new System.Drawing.Size(400, 200);
@@ -136,6 +139,7 @@
             // 
             // picWaveform3
             // 
+            this.picWaveform3.BackColor = System.Drawing.Color.White;
             this.picWaveform3.Location = new System.Drawing.Point(419, 282);
             this.picWaveform3.Name = "picWaveform3";
             this.picWaveform3.Size = new System.Drawing.Size(400, 200);

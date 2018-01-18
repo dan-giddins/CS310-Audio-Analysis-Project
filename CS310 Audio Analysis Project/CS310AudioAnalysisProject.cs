@@ -258,7 +258,7 @@ namespace CS310_Audio_Analysis_Project
         internal static void startAnalysisThread()
         {
             analysisThread = new Thread(runAnalysisForm);
-            analysisForm = new AnalysisForm(eventWaitHandle);
+            analysisForm = new AnalysisForm();
             analysisThread.Start();
         }
 

@@ -40,6 +40,7 @@
             // 
             // picFrequency3
             // 
+            this.picFrequency3.BackColor = System.Drawing.Color.White;
             this.picFrequency3.Location = new System.Drawing.Point(419, 218);
             this.picFrequency3.Name = "picFrequency3";
             this.picFrequency3.Size = new System.Drawing.Size(400, 200);
@@ -49,6 +50,7 @@
             // 
             // picFrequency2
             // 
+            this.picFrequency2.BackColor = System.Drawing.Color.White;
             this.picFrequency2.Location = new System.Drawing.Point(12, 218);
             this.picFrequency2.Name = "picFrequency2";
             this.picFrequency2.Size = new System.Drawing.Size(400, 200);
@@ -58,6 +60,7 @@
             // 
             // picFrequency1
             // 
+            this.picFrequency1.BackColor = System.Drawing.Color.White;
             this.picFrequency1.Location = new System.Drawing.Point(419, 12);
             this.picFrequency1.Name = "picFrequency1";
             this.picFrequency1.Size = new System.Drawing.Size(400, 200);
@@ -67,6 +70,7 @@
             // 
             // picFrequency0
             // 
+            this.picFrequency0.BackColor = System.Drawing.Color.White;
             this.picFrequency0.Location = new System.Drawing.Point(12, 12);
             this.picFrequency0.Name = "picFrequency0";
             this.picFrequency0.Size = new System.Drawing.Size(400, 200);
@@ -78,7 +82,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(881, 473);
+            this.ClientSize = new System.Drawing.Size(831, 429);
             this.Controls.Add(this.picFrequency3);
             this.Controls.Add(this.picFrequency2);
             this.Controls.Add(this.picFrequency1);
