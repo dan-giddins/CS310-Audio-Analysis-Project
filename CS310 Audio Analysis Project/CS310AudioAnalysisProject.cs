@@ -15,6 +15,7 @@ namespace CS310_Audio_Analysis_Project
         private const byte BIT_DEPTH = 16;
         private const int BYTES_PER_SAMPLE = BIT_DEPTH / 8;
         internal const byte INPUTS = 4;
+        internal const double SEPARATION = 1;
         private static WaveInEvent[] waveIn = new WaveInEvent[INPUTS];
         private static BufferedWaveProvider[] bufferedWaveProvider = new BufferedWaveProvider[INPUTS];
         private static int[] currentDevice = new int[INPUTS];
