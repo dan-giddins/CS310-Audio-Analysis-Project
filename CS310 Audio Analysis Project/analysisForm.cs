@@ -1,15 +1,10 @@
 ﻿using Accord;
-using ColorMine;
 using ColorMine.ColorSpaces;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 
 namespace CS310_Audio_Analysis_Project
@@ -24,9 +19,14 @@ namespace CS310_Audio_Analysis_Project
         private static DoublePoint[] frequencyPoints = new DoublePoint[BUFFER_SIZE];
         private static float SCALE = 200;
         private static int SIZE = 10;
+        private static System.Timers.Timer timer;
 
         public AnalysisForm()
         {
+            timer = new System.Timers.Timer(15);
+            timer.Enabled = false;
+            timer.Elapsed += new ElapsedEventHandler(timer_Tick);
+            timer.Start();
             InitializeComponent();
         }
 
@@ -38,7 +38,9 @@ namespace CS310_Audio_Analysis_Project
 
         private void timer_Tick(object sender, EventArgs e)
         {
+            timer.Stop();
             locateFrequencies();
+            timer.Start();
         }
 
         private void locateFrequencies()

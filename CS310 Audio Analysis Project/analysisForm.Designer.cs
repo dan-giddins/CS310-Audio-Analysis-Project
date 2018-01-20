@@ -28,17 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.timer = new System.Windows.Forms.Timer(this.components);
             this.picAnalysis = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.picAnalysis)).BeginInit();
             this.SuspendLayout();
-            // 
-            // timer
-            // 
-            this.timer.Enabled = true;
-            this.timer.Interval = 15;
-            this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
             // picAnalysis
             // 
@@ -64,8 +56,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.PictureBox picAnalysis;
     }
 }

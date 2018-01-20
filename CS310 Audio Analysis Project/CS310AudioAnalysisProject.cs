@@ -17,6 +17,7 @@ namespace CS310_Audio_Analysis_Project
         private const int BYTES_PER_SAMPLE = BIT_DEPTH / 8;
         internal const byte INPUTS = 4;
         internal const double SEPARATION = 1;
+        private const byte MAX_CHANNELS = 2;
         private static WaveInEvent[] waveIn = new WaveInEvent[INPUTS];
         private static BufferedWaveProvider[] bufferedWaveProvider = new BufferedWaveProvider[INPUTS];
         private static Device[] currentDevice = new Device[INPUTS];
@@ -184,7 +185,7 @@ namespace CS310_Audio_Analysis_Project
             {
                 waveIn[i] = new WaveInEvent();
                 waveValues[i] = new short[BUFFER_SIZE];
-                frameArray[i] = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE];
+                frameArray[i] = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE * MAX_CHANNELS];
             }
             boxDevices[0] = configureInputForm.getBoxDevices0();
             boxDevices[1] = configureInputForm.getBoxDevices1();
@@ -317,7 +318,7 @@ namespace CS310_Audio_Analysis_Project
             {
                 waveIn[i].DeviceNumber = currentDevice[i].deviceNo;
             }
-            waveIn[i].WaveFormat = new WaveFormat(SAMPLE_RATE, WaveIn.GetCapabilities(currentDevice[i].deviceNo).Channels);
+            waveIn[i].WaveFormat = new WaveFormat(SAMPLE_RATE, currentDevice[i].channelCount);
             waveIn[i].BufferMilliseconds = (int)((double)BUFFER_SIZE / SAMPLE_RATE * 1000.0);
         }
 
@@ -371,9 +372,10 @@ namespace CS310_Audio_Analysis_Project
             int deviceCount = WaveIn.DeviceCount;
             for (byte i = 0; i < deviceCount; i++)
             {
-                for (byte j = 0; j < WaveIn.GetCapabilities(i).Channels; j++)
+                int channelCount = WaveIn.GetCapabilities(i).Channels;
+                for (byte j = 0; j < channelCount; j++)
                 {
-                    deviceMap.Add(new Device(i, j));
+                    deviceMap.Add(new Device(i, j, channelCount));
                 }
             }
             for (byte i = 0; i < INPUTS; i++)
@@ -407,10 +409,12 @@ namespace CS310_Audio_Analysis_Project
             {
                 if (readFromFile || currentDevice[i].deviceNo > -1)
                 {
-                    bufferedWaveProvider[i].Read(frameArray[i], 0, frameArray[i].Length);
+                    bufferedWaveProvider[i].Read(frameArray[i], 0, frameArray[i].Length * currentDevice[i].channelCount / MAX_CHANNELS);
+                    int k = currentDevice[i].channelNo;
                     for (int j = 0; j < waveValues[i].Length; j++)
                     {
-                        waveValues[i][j] = (short)((frameArray[i][j * 2 + 1] << 8) | frameArray[i][j * 2]);
+                        waveValues[i][j] = (short)((frameArray[i][k * 2 + 1] << 8) | frameArray[i][k * 2]);
+                        k += currentDevice[i].channelCount;
                     }
                     frequencyValues[i] = FFT(waveValues[i]);
                 }
