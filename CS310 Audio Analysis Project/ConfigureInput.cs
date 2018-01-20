@@ -142,24 +142,27 @@ namespace CS310_Audio_Analysis_Project
             for (byte j = 0; j < deviceCount; j++)
             {
                 WaveInCapabilities capabilities = WaveIn.GetCapabilities(j);
-                String element = j + ": " + capabilities.ProductName + ", Channels: " + capabilities.Channels;
-                StringDelegateReturnInt d = null;
-                switch (i)
+                for (int k = 0; k < capabilities.Channels; k++)
                 {
-                    case 0:
-                        d = new StringDelegateReturnInt(boxDevices0.Items.Add);
-                        break;
-                    case 1:
-                        d = new StringDelegateReturnInt(boxDevices1.Items.Add);
-                        break;
-                    case 2:
-                        d = new StringDelegateReturnInt(boxDevices2.Items.Add);
-                        break;
-                    case 3:
-                        d = new StringDelegateReturnInt(boxDevices3.Items.Add);
-                        break;
+                    string element = j + ": " + capabilities.ProductName + ", Channel: " + k;
+                    StringDelegateReturnInt d = null;
+                    switch (i)
+                    {
+                        case 0:
+                            d = new StringDelegateReturnInt(boxDevices0.Items.Add);
+                            break;
+                        case 1:
+                            d = new StringDelegateReturnInt(boxDevices1.Items.Add);
+                            break;
+                        case 2:
+                            d = new StringDelegateReturnInt(boxDevices2.Items.Add);
+                            break;
+                        case 3:
+                            d = new StringDelegateReturnInt(boxDevices3.Items.Add);
+                            break;
+                    }
+                    Invoke(d, new object[] { element });
                 }
-                Invoke(d, new object[] { element });
             }
         }
 

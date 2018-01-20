@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Threading;
 using System.Numerics;
 using System.Timers;
+using System.Collections.Generic;
 
 namespace CS310_Audio_Analysis_Project
 {
@@ -18,7 +19,7 @@ namespace CS310_Audio_Analysis_Project
         internal const double SEPARATION = 1;
         private static WaveInEvent[] waveIn = new WaveInEvent[INPUTS];
         private static BufferedWaveProvider[] bufferedWaveProvider = new BufferedWaveProvider[INPUTS];
-        private static int[] currentDevice = new int[INPUTS];
+        private static Device[] currentDevice = new Device[INPUTS];
         private static short[][] waveValues = new short[INPUTS][];
         private static double[][] frequencyValues = new double[INPUTS][];
         private static byte[][] frameArray = new byte[INPUTS][];
@@ -43,6 +44,7 @@ namespace CS310_Audio_Analysis_Project
         private static bool readFromFile;
         private static WaveFileReader[] waveFileReader = new WaveFileReader[4];
         private static System.Timers.Timer timer;
+        private static List<Device> deviceMap = new List<Device>();
 
         static void Main()
         {
@@ -76,7 +78,7 @@ namespace CS310_Audio_Analysis_Project
                     }
                     for (byte i = 0; i < INPUTS; i++)
                     {
-                        if (readFromFile || currentDevice[i] > -1)
+                        if (readFromFile || currentDevice[i].deviceNo > -1)
                         {
                             analysisForm.copyFrequencyData(frequencyValues, i);
                         }             
@@ -295,7 +297,7 @@ namespace CS310_Audio_Analysis_Project
 
         private static void startRecording(byte i)
         {
-            if (!recording[i] && currentDevice[i] > -1)
+            if (!recording[i] && currentDevice[i].deviceNo > -1)
             {
                 try
                 {
@@ -311,11 +313,11 @@ namespace CS310_Audio_Analysis_Project
 
         private static void configWaveIn(int i)
         {
-            if (currentDevice[i] > -1)
+            if (currentDevice[i].deviceNo > -1)
             {
-                waveIn[i].DeviceNumber = currentDevice[i];
+                waveIn[i].DeviceNumber = currentDevice[i].deviceNo;
             }
-            waveIn[i].WaveFormat = new WaveFormat(SAMPLE_RATE, 1);
+            waveIn[i].WaveFormat = new WaveFormat(SAMPLE_RATE, WaveIn.GetCapabilities(currentDevice[i].deviceNo).Channels);
             waveIn[i].BufferMilliseconds = (int)((double)BUFFER_SIZE / SAMPLE_RATE * 1000.0);
         }
 
@@ -367,6 +369,13 @@ namespace CS310_Audio_Analysis_Project
         internal static void updateAudioDevices()
         {
             int deviceCount = WaveIn.DeviceCount;
+            for (byte i = 0; i < deviceCount; i++)
+            {
+                for (byte j = 0; j < WaveIn.GetCapabilities(i).Channels; j++)
+                {
+                    deviceMap.Add(new Device(i, j));
+                }
+            }
             for (byte i = 0; i < INPUTS; i++)
             {
                 configureInputForm.clearItems(i);
@@ -380,7 +389,7 @@ namespace CS310_Audio_Analysis_Project
             timer.Enabled = false;
             for (byte i = 0; i < INPUTS; i++)
             {
-                if (readFromFile || currentDevice[i] > -1)
+                if (readFromFile || currentDevice[i].deviceNo > -1)
                 {
                     picWaveform[i].Invalidate();
                     if (frequencyDrawing)
@@ -396,7 +405,7 @@ namespace CS310_Audio_Analysis_Project
         {
             for (byte i = 0; i < INPUTS; i++)
             {
-                if (readFromFile || currentDevice[i] > -1)
+                if (readFromFile || currentDevice[i].deviceNo > -1)
                 {
                     bufferedWaveProvider[i].Read(frameArray[i], 0, frameArray[i].Length);
                     for (int j = 0; j < waveValues[i].Length; j++)
@@ -459,8 +468,8 @@ namespace CS310_Audio_Analysis_Project
 
         internal static void updateDeviceSelection(byte i)
         {
-            currentDevice[i] = getSelectedIndex(i);
-            Console.Out.WriteLine(i + " - selected device: " + currentDevice[i]);
+            currentDevice[i] = deviceMap[getSelectedIndex(i)];
+            Console.Out.WriteLine(i + " - selected device: " + currentDevice[i].deviceNo);
             if (allowRecording)
             {
                 stopTest();
