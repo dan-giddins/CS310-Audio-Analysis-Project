@@ -1,5 +1,4 @@
 ﻿using Accord;
-using ColorMine.ColorSpaces;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -20,26 +19,36 @@ namespace CS310_Audio_Analysis_Project
         private static float SCALE = 200;
         private static int SIZE = 10;
         private static System.Timers.Timer timer;
+        private static bool update = true;
 
         public AnalysisForm()
         {
             timer = new System.Timers.Timer(15);
             timer.Enabled = false;
             timer.Elapsed += new ElapsedEventHandler(timer_Tick);
-            timer.Start();
             InitializeComponent();
         }
 
         internal void copyFrequencyData(double[][] frequencyValues, byte i)
         {
-            AnalysisForm.frequencyValues[i] = new double[BUFFER_SIZE];
-            Array.Copy(frequencyValues[i], AnalysisForm.frequencyValues[i], BUFFER_SIZE);
+            if (update)
+            {
+                timer.Stop();
+                AnalysisForm.frequencyValues[i] = new double[BUFFER_SIZE];
+                Array.Copy(frequencyValues[i], AnalysisForm.frequencyValues[i], BUFFER_SIZE);
+                if (i == (byte)(INPUTS - 1))
+                {
+                    update = false;
+                    timer.Start();
+                }
+            }
         }
 
         private void timer_Tick(object sender, EventArgs e)
         {
             timer.Stop();
             locateFrequencies();
+            update = true;
             timer.Start();
         }
 
@@ -124,14 +133,51 @@ namespace CS310_Audio_Analysis_Project
             Graphics graphics = Graphics.FromImage(bitmap);
             for (int i = 0; i < frequencyPoints.Length; i++)
             {
-                var myRgb = (new Hsv((double) i / frequencyPoints.Length, 1, 1)).To<Rgb>();
-                Color colour = Color.FromArgb((int)(myRgb.R), (int)(myRgb.G), (int)(myRgb.B));
-                graphics.FillEllipse(
-                    new SolidBrush(colour),
-                    (int)(picAnalysis.Width / 2 + (frequencyPoints[i].X * SCALE) - (SIZE / 2)),
-                    (int)(picAnalysis.Height / 2 - (frequencyPoints[i].Y * SCALE) - (SIZE / 2)),
-                    SIZE,
-                    SIZE);
+                if (!(double.IsNaN(frequencyPoints[i].X)) && !(double.IsNaN(frequencyPoints[i].Y)))
+                {
+                    double ratio = (double) i / (frequencyPoints.Length - 1);
+                    byte red = 0;
+                    byte green = 0;
+                    byte blue = 0;
+                    if (ratio <= 1.0 / 6.0)
+                    {
+                        red = 255;
+                        green = (byte)(ratio * 6.0 * 255);
+                    }
+                    else if (ratio <= 2.0 / 6.0)
+                    {
+                        red = (byte)(((2.0 / 6.0) - ratio) * 6.0 * 255);
+                        green = 255;
+                    }
+                    else if (ratio <= 3.0 / 6.0)
+                    {
+                        green = 255;
+                        blue = (byte)((ratio - (2.0 / 6.0)) * 6.0 * 255);
+                         
+                    }
+                    else if (ratio <= 4.0 / 6.0)
+                    {
+                        green = (byte)(((4.0 / 6.0) - ratio) * 6.0 * 255);
+                        blue = 255;
+                    }
+                    else if (ratio <= 5.0 / 6.0)
+                    {
+                        red = (byte)((ratio - (4.0 / 6.0)) * 6.0 * 255);
+                        blue = 255;
+                    }
+                    else
+                    {
+                        red = 255;
+                        blue = (byte)(((6.0 / 6.0) - ratio) * 6.0 * 255);
+                    }
+                    Color colour = Color.FromArgb(red, green, blue);
+                    graphics.FillEllipse(
+                        new SolidBrush(colour),
+                        (int)(picAnalysis.Width / 2 + (frequencyPoints[i].X * SCALE) - (SIZE / 2)),
+                        (int)(picAnalysis.Height / 2 - (frequencyPoints[i].Y * SCALE) - (SIZE / 2)),
+                        SIZE,
+                        SIZE);
+                }
             }
             e.Graphics.DrawImage(bitmap, 0, 0, ClientRectangle, GraphicsUnit.Pixel);
             graphics.Dispose();
