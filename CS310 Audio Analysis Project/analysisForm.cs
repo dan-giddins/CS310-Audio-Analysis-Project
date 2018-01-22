@@ -46,10 +46,11 @@ namespace CS310_Audio_Analysis_Project
 
         private void timer_Tick(object sender, EventArgs e)
         {
+            update = false;
             timer.Stop();
             locateFrequencies();
-            update = true;
             timer.Start();
+            update = true;
         }
 
         private void locateFrequencies()
