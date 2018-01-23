@@ -317,9 +317,9 @@ namespace CS310_Audio_Analysis_Project
             if (currentDevice[i].deviceNo > -1)
             {
                 waveIn[i].DeviceNumber = currentDevice[i].deviceNo;
+                waveIn[i].WaveFormat = new WaveFormat(SAMPLE_RATE, currentDevice[i].channelCount);
+                waveIn[i].BufferMilliseconds = (int)((double)BUFFER_SIZE / SAMPLE_RATE * 1000.0);
             }
-            waveIn[i].WaveFormat = new WaveFormat(SAMPLE_RATE, currentDevice[i].channelCount);
-            waveIn[i].BufferMilliseconds = (int)((double)BUFFER_SIZE / SAMPLE_RATE * 1000.0);
         }
 
         internal static void stopTest()
@@ -472,7 +472,13 @@ namespace CS310_Audio_Analysis_Project
 
         internal static void updateDeviceSelection(byte i)
         {
-            currentDevice[i] = deviceMap[getSelectedIndex(i)];
+            try
+            {
+                currentDevice[i] = deviceMap[getSelectedIndex(i)];
+            } catch (ArgumentOutOfRangeException e)
+            {
+                currentDevice[i] = new Device(-1, -1, -1);
+            }
             Console.Out.WriteLine(i + " - selected device: " + currentDevice[i].deviceNo);
             if (allowRecording)
             {
