@@ -6,6 +6,8 @@ using System.Threading;
 using System.Numerics;
 using System.Timers;
 using System.Collections.Generic;
+using NAudio.CoreAudioApi;
+using System.Linq;
 
 namespace CS310_Audio_Analysis_Project
 {
@@ -369,6 +371,8 @@ namespace CS310_Audio_Analysis_Project
 
         internal static void updateAudioDevices()
         {
+            var deviceEnum = new MMDeviceEnumerator();
+            var devices = deviceEnum.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToList();
             int deviceCount = WaveIn.DeviceCount;
             for (byte i = 0; i < deviceCount; i++)
             {
