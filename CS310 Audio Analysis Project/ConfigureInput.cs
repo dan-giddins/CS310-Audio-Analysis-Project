@@ -36,24 +36,9 @@ namespace CS310_Audio_Analysis_Project
             }
         }
 
-        private void boxDevices0_SelectedIndexChanged(object sender, EventArgs e)
+        private void boxDevice_SelectedIndexChanged(object sender, EventArgs e)
         {
-            CS310AudioAnalysisProject.updateDeviceSelection(0);       
-        }
-
-        private void boxDevices1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CS310AudioAnalysisProject.updateDeviceSelection(1);
-        }
-
-        private void boxDevices2_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CS310AudioAnalysisProject.updateDeviceSelection(2);
-        }
-
-        private void boxDevices3_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CS310AudioAnalysisProject.updateDeviceSelection(3);
+            CS310AudioAnalysisProject.updateDeviceSelection();       
         }
 
         private void picWaveform0_Paint(object sender, PaintEventArgs e)
@@ -96,7 +81,7 @@ namespace CS310_Audio_Analysis_Project
             return picWaveform3;
         }
 
-        internal ComboBox getBoxDevices0()
+        internal ComboBox getBoxDevice()
         {
             return boxDevice;
         }

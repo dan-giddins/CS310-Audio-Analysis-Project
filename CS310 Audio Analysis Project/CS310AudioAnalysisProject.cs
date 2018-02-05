@@ -20,9 +20,9 @@ namespace CS310_Audio_Analysis_Project
         internal const byte INPUTS = 4;
         internal const double SEPARATION = 1;
         private const byte MAX_CHANNELS = 2;
-        private static WasapiCapture[] waveIn = new WasapiCapture[INPUTS];
+        private static WasapiCapture waveIn;
         private static BufferedWaveProvider[] bufferedWaveProvider = new BufferedWaveProvider[INPUTS];
-        private static Device[] currentDevice = new Device[INPUTS];
+        private static Device currentDevice;
         private static short[][] waveValues = new short[INPUTS][];
         private static double[][] frequencyValues = new double[INPUTS][];
         private static byte[][] frameArray = new byte[INPUTS][];
@@ -39,10 +39,10 @@ namespace CS310_Audio_Analysis_Project
         private static Thread configureInputThread;
         private static Thread frequencyThread;
         private static Thread analysisThread;
-        private delegate void IntDelegate(int i);
-        private delegate void ByteObjectDelegate(byte b, object o);
-        private delegate object ByteDelegateReturnObject(byte b);
-        private delegate int ByteDelegateReturnInt(byte b);
+        private delegate void Delegate();
+        private delegate void ByteObjectDelegate(object o);
+        private delegate object DelegateReturnObject();
+        private delegate int DelegateReturnInt();
         private static EventWaitHandle eventWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
         private static bool readFromFile;
         private static WaveFileReader[] waveFileReader = new WaveFileReader[4];
@@ -59,10 +59,7 @@ namespace CS310_Audio_Analysis_Project
             configureInputThread.Start();
             updateAudioDevices();
             displayDevices();
-            for (byte i = 0; i < INPUTS; i++)
-            {
-                updateDeviceSelection(i);
-            }
+            updateDeviceSelection();
             allowRecording = true;
             timer = new System.Timers.Timer(15);
             timer.Enabled = false;
@@ -81,7 +78,7 @@ namespace CS310_Audio_Analysis_Project
                     }
                     for (byte i = 0; i < INPUTS; i++)
                     {
-                        if (readFromFile || currentDevice[i] != null)
+                        if (readFromFile || i < currentDevice.channelCount)
                         {
                             analysisForm.copyFrequencyData(frequencyValues, i);
                         }             
@@ -116,26 +113,23 @@ namespace CS310_Audio_Analysis_Project
 
         private static void displayDevices()
         {
-            for (byte i = 0; i < INPUTS; i++)
-            {
-                setSelectedIndex(i);
-                setSelectedItem(i, getItem(i));
-                updateDeviceSelection(i);
-            }
+            setSelectedIndex();
+            setSelectedItem(getItem());
+            updateDeviceSelection();
         }
 
-        private static Object getItem(byte i)
+        private static Object getItem()
         {
             if (boxDevice.InvokeRequired)
             {
-                ByteDelegateReturnObject d = new ByteDelegateReturnObject(getItem);
-                return configureInputForm.Invoke(d, new object[] { i });
+                DelegateReturnObject d = new DelegateReturnObject(getItem);
+                return configureInputForm.Invoke(d, new object[] { });
             }
             else
             {
                 try
                 {
-                    return boxDevice.Items[i];
+                    return boxDevice.Items[0];
                 }
                 catch (ArgumentOutOfRangeException)
                 {
@@ -144,35 +138,35 @@ namespace CS310_Audio_Analysis_Project
             }
         }
 
-        private static void setSelectedItem(byte i, object o)
+        private static void setSelectedItem(object o)
         {
-            if (boxDevice[i].InvokeRequired)
+            if (boxDevice.InvokeRequired)
             {
                 ByteObjectDelegate d = new ByteObjectDelegate(setSelectedItem);
-                configureInputForm.Invoke(d, new object[] { i, o});
+                configureInputForm.Invoke(d, new object[] {o});
             }
             else
             {
-                boxDevice[i].SelectedItem = o;
+                boxDevice.SelectedItem = o;
             }
         }
 
-        private static void setSelectedIndex(int i)
+        private static void setSelectedIndex()
         {
-            if (boxDevice[i].InvokeRequired)
+            if (boxDevice.InvokeRequired)
             {
-                IntDelegate d = new IntDelegate(setSelectedIndex);
-                configureInputForm.Invoke(d, new object[] { i });
+                Delegate d = new Delegate(setSelectedIndex);
+                configureInputForm.Invoke(d, new object[] {});
             }
             else
             {
                 try
                 {
-                    boxDevice[i].SelectedIndex = i;
+                    boxDevice.SelectedIndex = 0;
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    boxDevice[i].SelectedIndex = -1;
+                    boxDevice.SelectedIndex = -1;
                 }
             }
         }
@@ -183,9 +177,9 @@ namespace CS310_Audio_Analysis_Project
             picWaveform[1] = configureInputForm.getPicWaveform1();
             picWaveform[2] = configureInputForm.getPicWaveform2();
             picWaveform[3] = configureInputForm.getPicWaveform3();
+            waveIn = new WasapiCapture();
             for (int i = 0; i < INPUTS; i++)
             {
-                waveIn[i] = new WasapiCapture();
                 waveValues[i] = new short[BUFFER_SIZE];
                 frameArray[i] = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE * MAX_CHANNELS];
             }
@@ -225,10 +219,7 @@ namespace CS310_Audio_Analysis_Project
                     configWaveIn(i);
                 }
                 //waveIn[0].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable0);
-                waveIn[0].DataAvailable += waveInDataAvailable0;
-                waveIn[1].DataAvailable += waveInDataAvailable1;
-                waveIn[2].DataAvailable += waveInDataAvailable2;
-                waveIn[3].DataAvailable += waveInDataAvailable3;
+                waveIn.DataAvailable += waveInDataAvailable;
             }
             for (byte i = 0; i < INPUTS; i++)
             {
@@ -298,7 +289,7 @@ namespace CS310_Audio_Analysis_Project
 
         private static void startRecording(byte i)
         {
-            if (!recording[i] && currentDevice[i] != null)
+            if (!recording[i] && i < currentDevice.channelCount)
             {
                 try
                 {
@@ -314,11 +305,11 @@ namespace CS310_Audio_Analysis_Project
 
         private static void configWaveIn(int i)
         {
-            if (currentDevice[i] != null)
+            if (i < currentDevice.channelCount)
             {
                 // Event sync may be false here
-                waveIn[i] = new WasapiCapture(currentDevice[i].device, true, (int)((double)BUFFER_SIZE / SAMPLE_RATE * 1000.0));
-                waveIn[i].WaveFormat = new WaveFormat(SAMPLE_RATE, currentDevice[i].channelCount);
+                waveIn = new WasapiCapture(currentDevice.device, true, (int)((double)BUFFER_SIZE / SAMPLE_RATE * 1000.0));
+                waveIn.WaveFormat = new WaveFormat(SAMPLE_RATE, currentDevice[i].channelCount);
             }
         }
 
@@ -347,7 +338,7 @@ namespace CS310_Audio_Analysis_Project
             }
         }
 
-        private static void waveInDataAvailable0(object sender, WaveInEventArgs e)
+        private static void waveInDataAvailable(object sender, WaveInEventArgs e)
         {
             bufferedWaveProvider[0].AddSamples(e.Buffer, 0, e.BytesRecorded);
         }
@@ -374,16 +365,12 @@ namespace CS310_Audio_Analysis_Project
             int deviceCount = devices.Count();
             for (byte i = 0; i < deviceCount; i++)
             {
-                int channelCount = devices[i].AudioEndpointVolume.Channels.Count;
-                for (byte j = 0; j < channelCount; j++)
-                {
-                    deviceMap.Add(new Device(devices[i], j));
-                }
+                deviceMap.Add(new Device(devices[i]));
             }
             for (byte i = 0; i < INPUTS; i++)
             {
-                configureInputForm.clearItems(i);
-                configureInputForm.addItems(i, deviceCount);
+                configureInputForm.clearItems();
+                configureInputForm.addItems(deviceCount);
             }
 
         }
@@ -393,7 +380,7 @@ namespace CS310_Audio_Analysis_Project
             timer.Enabled = false;
             for (byte i = 0; i < INPUTS; i++)
             {
-                if (readFromFile || currentDevice[i] != null)
+                if (readFromFile || i < currentDevice.channelCount)
                 {
                     picWaveform[i].Invalidate();
                     if (frequencyDrawing)
@@ -409,7 +396,7 @@ namespace CS310_Audio_Analysis_Project
         {
             for (byte i = 0; i < INPUTS; i++)
             {
-                if (readFromFile || currentDevice[i] != null)
+                if (readFromFile || i < currentDevice.channelCount)
                 {
                     bufferedWaveProvider[i].Read(frameArray[i], 0, frameArray[i].Length * currentDevice[i].channelCount / MAX_CHANNELS);
                     int k = currentDevice[i].channelNo;
@@ -472,15 +459,15 @@ namespace CS310_Audio_Analysis_Project
             graphics.Dispose();
         }
 
-        internal static void updateDeviceSelection(byte i)
+        internal static void updateDeviceSelection()
         {
             try
             {
-                currentDevice[i] = deviceMap[getSelectedIndex(i)];
-                Console.Out.WriteLine(i + " - selected device: " + currentDevice[i].device.FriendlyName);
+                currentDevice = deviceMap[getSelectedIndex()];
+                Console.Out.WriteLine("Selected device: " + currentDevice.device.FriendlyName);
             } catch (ArgumentOutOfRangeException)
             {
-                currentDevice[i] = null;
+                currentDevice = null;
             }
             
             if (allowRecording)
@@ -490,16 +477,16 @@ namespace CS310_Audio_Analysis_Project
             }
         }
 
-        private static int getSelectedIndex(byte i)
+        private static int getSelectedIndex()
         {
-            if (boxDevice[i].InvokeRequired)
+            if (boxDevice.InvokeRequired)
             {
-                ByteDelegateReturnInt d = new ByteDelegateReturnInt(getSelectedIndex);
-                return (int) configureInputForm.Invoke(d, new object[] { i });
+                DelegateReturnInt d = new DelegateReturnInt(getSelectedIndex);
+                return (int) configureInputForm.Invoke(d, new object[] {});
             }
             else
             {
-                return boxDevice[i].SelectedIndex;
+                return boxDevice.SelectedIndex;
             }
         }
 

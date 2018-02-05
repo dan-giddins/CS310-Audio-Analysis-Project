@@ -10,13 +10,11 @@ namespace CS310_Audio_Analysis_Project
     class Device
     {
         public MMDevice device;
-        public int channelNo;
         public int channelCount;
 
-        public Device(MMDevice device, int channelNo)
+        public Device(MMDevice device)
         {
             this.device = device;
-            this.channelNo = channelNo;
             channelCount = device.AudioEndpointVolume.Channels.Count;
         }
     }
