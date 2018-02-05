@@ -98,46 +98,16 @@ namespace CS310_Audio_Analysis_Project
 
         internal ComboBox getBoxDevices0()
         {
-            return boxDevices0;
+            return boxDevice;
         }
 
-        internal ComboBox getBoxDevices1()
+        internal void clearItems()
         {
-            return boxDevices1;
-        }
-
-        internal ComboBox getBoxDevices2()
-        {
-            return boxDevices2;
-        }
-
-        internal ComboBox getBoxDevices3()
-        {
-            return boxDevices3;
-        }
-
-        internal void clearItems(byte i)
-        {
-            VoidDelegate d = null;
-            switch (i)
-            {
-                case 0:
-                    d = new VoidDelegate(boxDevices0.Items.Clear);
-                    break;
-                case 1:
-                    d = new VoidDelegate(boxDevices1.Items.Clear);
-                    break;
-                case 2:
-                    d = new VoidDelegate(boxDevices2.Items.Clear);
-                    break;
-                case 3:
-                    d = new VoidDelegate(boxDevices3.Items.Clear);
-                    break;
-            }
+            VoidDelegate d = new VoidDelegate(boxDevice.Items.Clear);
             Invoke(d);
         }
 
-        internal void addItems(byte i, int deviceCount)
+        internal void addItems(int deviceCount)
         {
             for (byte j = 0; j < deviceCount; j++)
             {
@@ -145,22 +115,7 @@ namespace CS310_Audio_Analysis_Project
                 for (int k = 0; k < capabilities.Channels; k++)
                 {
                     string element = j + ": " + capabilities.ProductName + ", Channel: " + k;
-                    StringDelegateReturnInt d = null;
-                    switch (i)
-                    {
-                        case 0:
-                            d = new StringDelegateReturnInt(boxDevices0.Items.Add);
-                            break;
-                        case 1:
-                            d = new StringDelegateReturnInt(boxDevices1.Items.Add);
-                            break;
-                        case 2:
-                            d = new StringDelegateReturnInt(boxDevices2.Items.Add);
-                            break;
-                        case 3:
-                            d = new StringDelegateReturnInt(boxDevices3.Items.Add);
-                            break;
-                    }
+                    StringDelegateReturnInt d = new StringDelegateReturnInt(boxDevice.Items.Add);
                     Invoke(d, new object[] { element });
                 }
             }

@@ -28,7 +28,7 @@ namespace CS310_Audio_Analysis_Project
         private static byte[][] frameArray = new byte[INPUTS][];
         private static PictureBox[] picWaveform = new PictureBox[INPUTS];
         private static PictureBox[] picFrequency = new PictureBox[INPUTS];
-        private static ComboBox[] boxDevices = new ComboBox[INPUTS];
+        private static ComboBox boxDevice;
         private static bool[] recording = new bool[INPUTS];
         private static bool allowRecording = false;
         private static bool frequencyDrawing = false;
@@ -126,7 +126,7 @@ namespace CS310_Audio_Analysis_Project
 
         private static Object getItem(byte i)
         {
-            if (boxDevices[i].InvokeRequired)
+            if (boxDevice.InvokeRequired)
             {
                 ByteDelegateReturnObject d = new ByteDelegateReturnObject(getItem);
                 return configureInputForm.Invoke(d, new object[] { i });
@@ -135,7 +135,7 @@ namespace CS310_Audio_Analysis_Project
             {
                 try
                 {
-                    return boxDevices[i].Items[i];
+                    return boxDevice.Items[i];
                 }
                 catch (ArgumentOutOfRangeException)
                 {
@@ -146,20 +146,20 @@ namespace CS310_Audio_Analysis_Project
 
         private static void setSelectedItem(byte i, object o)
         {
-            if (boxDevices[i].InvokeRequired)
+            if (boxDevice[i].InvokeRequired)
             {
                 ByteObjectDelegate d = new ByteObjectDelegate(setSelectedItem);
                 configureInputForm.Invoke(d, new object[] { i, o});
             }
             else
             {
-                boxDevices[i].SelectedItem = o;
+                boxDevice[i].SelectedItem = o;
             }
         }
 
         private static void setSelectedIndex(int i)
         {
-            if (boxDevices[i].InvokeRequired)
+            if (boxDevice[i].InvokeRequired)
             {
                 IntDelegate d = new IntDelegate(setSelectedIndex);
                 configureInputForm.Invoke(d, new object[] { i });
@@ -168,11 +168,11 @@ namespace CS310_Audio_Analysis_Project
             {
                 try
                 {
-                    boxDevices[i].SelectedIndex = i;
+                    boxDevice[i].SelectedIndex = i;
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    boxDevices[i].SelectedIndex = -1;
+                    boxDevice[i].SelectedIndex = -1;
                 }
             }
         }
@@ -189,10 +189,7 @@ namespace CS310_Audio_Analysis_Project
                 waveValues[i] = new short[BUFFER_SIZE];
                 frameArray[i] = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE * MAX_CHANNELS];
             }
-            boxDevices[0] = configureInputForm.getBoxDevices0();
-            boxDevices[1] = configureInputForm.getBoxDevices1();
-            boxDevices[2] = configureInputForm.getBoxDevices2();
-            boxDevices[3] = configureInputForm.getBoxDevices3();
+            boxDevice = configureInputForm.getBoxDevice();
         }
 
         internal static void configureFrequencyArrays()
@@ -495,14 +492,14 @@ namespace CS310_Audio_Analysis_Project
 
         private static int getSelectedIndex(byte i)
         {
-            if (boxDevices[i].InvokeRequired)
+            if (boxDevice[i].InvokeRequired)
             {
                 ByteDelegateReturnInt d = new ByteDelegateReturnInt(getSelectedIndex);
                 return (int) configureInputForm.Invoke(d, new object[] { i });
             }
             else
             {
-                return boxDevices[i].SelectedIndex;
+                return boxDevice[i].SelectedIndex;
             }
         }
 
