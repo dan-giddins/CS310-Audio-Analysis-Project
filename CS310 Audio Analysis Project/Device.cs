@@ -11,7 +11,7 @@ namespace CS310_Audio_Analysis_Project
         public int deviceNo;
         public int channelNo;
         public int channelCount;
-
+         
         public Device(int deviceNo, int channelNo, int channelCount)
         {
             this.deviceNo = deviceNo;
