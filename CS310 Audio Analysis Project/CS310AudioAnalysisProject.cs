@@ -20,7 +20,7 @@ namespace CS310_Audio_Analysis_Project
         internal const byte INPUTS = 4;
         internal const double SEPARATION = 1;
         private const byte MAX_CHANNELS = 2;
-        private static WaveInEvent[] waveIn = new WaveInEvent[INPUTS];
+        private static WasapiCapture[] waveIn = new WasapiCapture[INPUTS];
         private static BufferedWaveProvider[] bufferedWaveProvider = new BufferedWaveProvider[INPUTS];
         private static Device[] currentDevice = new Device[INPUTS];
         private static short[][] waveValues = new short[INPUTS][];
@@ -81,7 +81,7 @@ namespace CS310_Audio_Analysis_Project
                     }
                     for (byte i = 0; i < INPUTS; i++)
                     {
-                        if (readFromFile || currentDevice[i].deviceNo > -1)
+                        if (readFromFile || currentDevice[i] != null)
                         {
                             analysisForm.copyFrequencyData(frequencyValues, i);
                         }             
@@ -185,7 +185,7 @@ namespace CS310_Audio_Analysis_Project
             picWaveform[3] = configureInputForm.getPicWaveform3();
             for (int i = 0; i < INPUTS; i++)
             {
-                waveIn[i] = new WaveInEvent();
+                waveIn[i] = new WasapiCapture();
                 waveValues[i] = new short[BUFFER_SIZE];
                 frameArray[i] = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE * MAX_CHANNELS];
             }
@@ -227,10 +227,11 @@ namespace CS310_Audio_Analysis_Project
                 {
                     configWaveIn(i);
                 }
-                waveIn[0].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable0);
-                waveIn[1].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable1);
-                waveIn[2].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable2);
-                waveIn[3].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable3);
+                //waveIn[0].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable0);
+                waveIn[0].DataAvailable += waveInDataAvailable0;
+                waveIn[1].DataAvailable += waveInDataAvailable1;
+                waveIn[2].DataAvailable += waveInDataAvailable2;
+                waveIn[3].DataAvailable += waveInDataAvailable3;
             }
             for (byte i = 0; i < INPUTS; i++)
             {
@@ -300,7 +301,7 @@ namespace CS310_Audio_Analysis_Project
 
         private static void startRecording(byte i)
         {
-            if (!recording[i] && currentDevice[i].deviceNo > -1)
+            if (!recording[i] && currentDevice[i] != null)
             {
                 try
                 {
@@ -316,11 +317,11 @@ namespace CS310_Audio_Analysis_Project
 
         private static void configWaveIn(int i)
         {
-            if (currentDevice[i].deviceNo > -1)
+            if (currentDevice[i] != null)
             {
-                waveIn[i].DeviceNumber = currentDevice[i].deviceNo;
+                // Event sync may be false here
+                waveIn[i] = new WasapiCapture(currentDevice[i].device, true, (int)((double)BUFFER_SIZE / SAMPLE_RATE * 1000.0));
                 waveIn[i].WaveFormat = new WaveFormat(SAMPLE_RATE, currentDevice[i].channelCount);
-                waveIn[i].BufferMilliseconds = (int)((double)BUFFER_SIZE / SAMPLE_RATE * 1000.0);
             }
         }
 
@@ -372,14 +373,14 @@ namespace CS310_Audio_Analysis_Project
         internal static void updateAudioDevices()
         {
             var deviceEnum = new MMDeviceEnumerator();
-            var devices = deviceEnum.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToList();
-            int deviceCount = WaveIn.DeviceCount;
+            List<MMDevice> devices = deviceEnum.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToList();
+            int deviceCount = devices.Count();
             for (byte i = 0; i < deviceCount; i++)
             {
-                int channelCount = WaveIn.GetCapabilities(i).Channels;
+                int channelCount = devices[i].AudioEndpointVolume.Channels.Count;
                 for (byte j = 0; j < channelCount; j++)
                 {
-                    deviceMap.Add(new Device(i, j, channelCount));
+                    deviceMap.Add(new Device(devices[i], j));
                 }
             }
             for (byte i = 0; i < INPUTS; i++)
@@ -395,7 +396,7 @@ namespace CS310_Audio_Analysis_Project
             timer.Enabled = false;
             for (byte i = 0; i < INPUTS; i++)
             {
-                if (readFromFile || currentDevice[i].deviceNo > -1)
+                if (readFromFile || currentDevice[i] != null)
                 {
                     picWaveform[i].Invalidate();
                     if (frequencyDrawing)
@@ -411,7 +412,7 @@ namespace CS310_Audio_Analysis_Project
         {
             for (byte i = 0; i < INPUTS; i++)
             {
-                if (readFromFile || currentDevice[i].deviceNo > -1)
+                if (readFromFile || currentDevice[i] != null)
                 {
                     bufferedWaveProvider[i].Read(frameArray[i], 0, frameArray[i].Length * currentDevice[i].channelCount / MAX_CHANNELS);
                     int k = currentDevice[i].channelNo;
@@ -479,11 +480,12 @@ namespace CS310_Audio_Analysis_Project
             try
             {
                 currentDevice[i] = deviceMap[getSelectedIndex(i)];
-            } catch (ArgumentOutOfRangeException e)
+                Console.Out.WriteLine(i + " - selected device: " + currentDevice[i].device.FriendlyName);
+            } catch (ArgumentOutOfRangeException)
             {
-                currentDevice[i] = new Device(-1, -1, -1);
+                currentDevice[i] = null;
             }
-            Console.Out.WriteLine(i + " - selected device: " + currentDevice[i].deviceNo);
+            
             if (allowRecording)
             {
                 stopTest();

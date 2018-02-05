@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NAudio.CoreAudioApi;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,15 +9,15 @@ namespace CS310_Audio_Analysis_Project
 {
     class Device
     {
-        public int deviceNo;
+        public MMDevice device;
         public int channelNo;
         public int channelCount;
 
-        public Device(int deviceNo, int channelNo, int channelCount)
+        public Device(MMDevice device, int channelNo)
         {
-            this.deviceNo = deviceNo;
+            this.device = device;
             this.channelNo = channelNo;
-            this.channelCount = channelCount;
+            channelCount = device.AudioEndpointVolume.Channels.Count;
         }
     }
 }
