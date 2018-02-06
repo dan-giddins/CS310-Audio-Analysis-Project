@@ -121,7 +121,7 @@
             this.boxDevice.Name = "boxDevice";
             this.boxDevice.Size = new System.Drawing.Size(323, 21);
             this.boxDevice.TabIndex = 2;
-            this.boxDevice.SelectedIndexChanged += new System.EventHandler(this.boxDevices0_SelectedIndexChanged);
+            this.boxDevice.SelectedIndexChanged += new System.EventHandler(this.boxDevice_SelectedIndexChanged);
             // 
             // btnFrequencies
             // 

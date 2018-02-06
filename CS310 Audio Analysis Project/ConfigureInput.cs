@@ -1,6 +1,9 @@
-﻿using NAudio.Wave;
+﻿using NAudio.CoreAudioApi;
+using NAudio.Wave;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
@@ -92,17 +95,14 @@ namespace CS310_Audio_Analysis_Project
             Invoke(d);
         }
 
-        internal void addItems(int deviceCount)
+        internal void addItems(List<MMDevice> devices)
         {
-            for (byte j = 0; j < deviceCount; j++)
+            int deviceCount = devices.Count();
+            for (byte i = 0; i < deviceCount; i++)
             {
-                WaveInCapabilities capabilities = WaveIn.GetCapabilities(j);
-                for (int k = 0; k < capabilities.Channels; k++)
-                {
-                    string element = j + ": " + capabilities.ProductName + ", Channel: " + k;
-                    StringDelegateReturnInt d = new StringDelegateReturnInt(boxDevice.Items.Add);
-                    Invoke(d, new object[] { element });
-                }
+                string element = i + ": " + devices[i].FriendlyName;
+                StringDelegateReturnInt d = new StringDelegateReturnInt(boxDevice.Items.Add);
+                Invoke(d, new object[] { element });
             }
         }
 
