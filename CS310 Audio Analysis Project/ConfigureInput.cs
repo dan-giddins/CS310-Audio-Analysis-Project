@@ -95,12 +95,12 @@ namespace CS310_Audio_Analysis_Project
             Invoke(d);
         }
 
-        internal void addItems(List<MMDevice> devices)
+        internal void addItems(List<Device> devices)
         {
             int deviceCount = devices.Count();
             for (byte i = 0; i < deviceCount; i++)
             {
-                string element = i + ": " + devices[i].FriendlyName;
+                string element = i + ": " + devices[i].device.DriverName;
                 StringDelegateReturnInt d = new StringDelegateReturnInt(boxDevice.Items.Add);
                 Invoke(d, new object[] { element });
             }

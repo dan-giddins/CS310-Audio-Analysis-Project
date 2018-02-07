@@ -1,16 +1,17 @@
 ﻿using NAudio.CoreAudioApi;
+using NAudio.Wave;
 
 namespace CS310_Audio_Analysis_Project
 {
     class Device
     {
-        public MMDevice device;
+        public AsioOut device;
         public int channelCount;
 
-        public Device(MMDevice device)
+        public Device(AsioOut device)
         {
             this.device = device;
-            channelCount = device.AudioEndpointVolume.Channels.Count;
+            channelCount = device.DriverInputChannelCount;
         }
     }
 }

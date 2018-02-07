@@ -214,7 +214,7 @@ namespace CS310_Audio_Analysis_Project
             else
             {
                 configWaveIn();
-                waveIn.DataAvailable += waveInDataAvailable;
+                currentDevice.device.AudioAvailable += OnAsioOutAudioAvailable;
             }
             configWaveBuffer();
             timer.Enabled = true;
@@ -297,9 +297,8 @@ namespace CS310_Audio_Analysis_Project
 
         private static void configWaveIn()
         {
-            // Event sync may be false here
-            waveIn = new WasapiCapture(currentDevice.device, true, (int)((double)BUFFER_SIZE / SAMPLE_RATE * 10000.0));
-            waveIn.WaveFormat = new WaveFormat(SAMPLE_RATE, currentDevice.channelCount);
+            //asioOut.InputChannelOffset = 4;
+            currentDevice.device.InitRecordAndPlayback(null, currentDevice.channelCount, SAMPLE_RATE);
         }
 
         internal static void stopTest()
@@ -335,14 +334,14 @@ namespace CS310_Audio_Analysis_Project
         internal static void updateAudioDevices()
         {
             var deviceEnum = new MMDeviceEnumerator();
-            List<MMDevice> devices = deviceEnum.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToList();
+            String[] devices = AsioOut.GetDriverNames();
             int deviceCount = devices.Count();
             for (byte i = 0; i < deviceCount; i++)
             {
-                deviceMap.Add(new Device(devices[i]));
+                deviceMap.Add(new Device(new AsioOut(devices[i])));
             }
             configureInputForm.clearItems();
-            configureInputForm.addItems(devices);
+            configureInputForm.addItems(deviceMap);
         }
 
         internal static void drawTest()
@@ -434,7 +433,7 @@ namespace CS310_Audio_Analysis_Project
             try
             {
                 currentDevice = deviceMap[getSelectedIndex()];
-                Console.Out.WriteLine("Selected device: " + currentDevice.device.FriendlyName);
+                Console.Out.WriteLine("Selected device: " + currentDevice.device.DriverName);
             } catch (ArgumentOutOfRangeException)
             {
                 currentDevice = null;
