@@ -213,11 +213,7 @@ namespace CS310_Audio_Analysis_Project
             }
             else
             {
-                for (byte i = 0; i < INPUTS; i++)
-                {
-                    configWaveIn(i);
-                }
-                //waveIn[0].DataAvailable += new EventHandler<WaveInEventArgs>(waveInDataAvailable0);
+                configWaveIn();
                 waveIn.DataAvailable += waveInDataAvailable;
             }
             configWaveBuffer();
@@ -299,14 +295,11 @@ namespace CS310_Audio_Analysis_Project
             }
         }
 
-        private static void configWaveIn(int i)
+        private static void configWaveIn()
         {
-            if (i < currentDevice.channelCount)
-            {
-                // Event sync may be false here
-                waveIn = new WasapiCapture(currentDevice.device, true, (int)((double)BUFFER_SIZE / SAMPLE_RATE * 10000.0));
-                waveIn.WaveFormat = new WaveFormat(SAMPLE_RATE, currentDevice.channelCount);
-            }
+            // Event sync may be false here
+            waveIn = new WasapiCapture(currentDevice.device, true, (int)((double)BUFFER_SIZE / SAMPLE_RATE * 10000.0));
+            waveIn.WaveFormat = new WaveFormat(SAMPLE_RATE, currentDevice.channelCount);
         }
 
         internal static void stopTest()
