@@ -20,12 +20,12 @@ namespace CS310_Audio_Analysis_Project
         internal const byte INPUTS = 4;
         internal const double SEPARATION = 1;
         private const byte MAX_CHANNELS = 4;
-        private static WasapiCapture waveIn;
         private static BufferedWaveProvider bufferedWaveProvider;
         private static Device currentDevice;
         private static short[][] waveValues = new short[INPUTS][];
         private static double[][] frequencyValues = new double[INPUTS][];
         private static byte[] frameArray = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE * MAX_CHANNELS];
+        private static float[] samples;
         private static PictureBox[] picWaveform = new PictureBox[INPUTS];
         private static PictureBox[] picFrequency = new PictureBox[INPUTS];
         private static ComboBox boxDevice;
@@ -49,6 +49,7 @@ namespace CS310_Audio_Analysis_Project
         private static System.Timers.Timer timer;
         private static List<Device> deviceMap = new List<Device>();
 
+        [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
@@ -177,7 +178,6 @@ namespace CS310_Audio_Analysis_Project
             picWaveform[1] = configureInputForm.getPicWaveform1();
             picWaveform[2] = configureInputForm.getPicWaveform2();
             picWaveform[3] = configureInputForm.getPicWaveform3();
-            waveIn = new WasapiCapture();
             for (int i = 0; i < INPUTS; i++)
             {
                 waveValues[i] = new short[BUFFER_SIZE];
@@ -220,6 +220,14 @@ namespace CS310_Audio_Analysis_Project
             timer.Enabled = true;
         }
 
+        private static void OnAsioOutAudioAvailable(object sender, AsioAudioAvailableEventArgs e)
+        {
+            e.GetAsInterleavedSamples(samples);
+            byte[] sampleBytes = new byte[samples.Length * currentDevice.channelCount * BIT_DEPTH / 8];
+
+            bufferedWaveProvider.AddSamples(sampleBytes, 0, sampleBytes.Length);
+        }
+
         internal static void analyse()
         {
             analysis = true;
@@ -257,7 +265,7 @@ namespace CS310_Audio_Analysis_Project
             }
             else
             {
-                waveFormat = waveIn.WaveFormat;
+                waveFormat = new WaveFormat(SAMPLE_RATE, currentDevice.channelCount);
             }
             bufferedWaveProvider = new BufferedWaveProvider(waveFormat);
             bufferedWaveProvider.BufferLength = BUFFER_SIZE * 2;
@@ -285,7 +293,7 @@ namespace CS310_Audio_Analysis_Project
             {
                 try
                 {
-                    waveIn.StartRecording();
+                    currentDevice.device.Play();
                     recording = true;
                 }
                 catch (NAudio.MmException e)
@@ -316,7 +324,7 @@ namespace CS310_Audio_Analysis_Project
             {
                 try
                 {
-                    waveIn.StopRecording();
+                    currentDevice.device.Stop();
                 }
                 catch (NAudio.MmException e)
                 {
