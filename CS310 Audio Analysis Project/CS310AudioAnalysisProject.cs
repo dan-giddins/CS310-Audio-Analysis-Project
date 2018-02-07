@@ -25,7 +25,8 @@ namespace CS310_Audio_Analysis_Project
         private static short[][] waveValues = new short[INPUTS][];
         private static double[][] frequencyValues = new double[INPUTS][];
         private static byte[] frameArray = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE * MAX_CHANNELS];
-        private static float[] samples;
+        private static float[] samples = new float[BUFFER_SIZE * MAX_CHANNELS];
+        private static byte[] sampleBytes = new byte[BUFFER_SIZE * BYTES_PER_SAMPLE * MAX_CHANNELS];
         private static PictureBox[] picWaveform = new PictureBox[INPUTS];
         private static PictureBox[] picFrequency = new PictureBox[INPUTS];
         private static ComboBox boxDevice;
@@ -223,8 +224,15 @@ namespace CS310_Audio_Analysis_Project
         private static void OnAsioOutAudioAvailable(object sender, AsioAudioAvailableEventArgs e)
         {
             e.GetAsInterleavedSamples(samples);
-            byte[] sampleBytes = new byte[samples.Length * currentDevice.channelCount * BIT_DEPTH / 8];
-
+            int sample;
+            int j;
+            for (int i = 0; i < samples.Length; i++)
+            {
+                sample = (int)(samples[i] * Math.Pow(2, 15));
+                j = i * 2;
+                sampleBytes[j] = (byte) sample;
+                sampleBytes[j + 1] = (byte) (sample >> 8);
+            }
             bufferedWaveProvider.AddSamples(sampleBytes, 0, sampleBytes.Length);
         }
 
@@ -343,10 +351,20 @@ namespace CS310_Audio_Analysis_Project
         {
             var deviceEnum = new MMDeviceEnumerator();
             String[] devices = AsioOut.GetDriverNames();
+            deviceMap.Add(new Device(new AsioOut("UMC ASIO Driver")));
             int deviceCount = devices.Count();
+            deviceCount = 0;
             for (byte i = 0; i < deviceCount; i++)
             {
-                deviceMap.Add(new Device(new AsioOut(devices[i])));
+                try
+                {
+                    deviceMap.Add(new Device(new AsioOut(devices[i])));
+                }
+                catch (InvalidOperationException e)
+                {
+                    Console.WriteLine(i + ": " + devices[i] + " failed with error:");
+                    Console.WriteLine(e);
+                }
             }
             configureInputForm.clearItems();
             configureInputForm.addItems(deviceMap);
