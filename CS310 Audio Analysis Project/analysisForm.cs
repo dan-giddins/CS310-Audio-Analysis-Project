@@ -10,7 +10,7 @@ namespace CS310_Audio_Analysis_Project
 {
     public partial class AnalysisForm : Form
     {
-        private const int THRESHOLD = 20;
+        private const int THRESHOLD = 40;
         private static byte INPUTS = CS310AudioAnalysisProject.INPUTS;
         private static double[][] frequencyValues = new double[INPUTS][];
         private static int BUFFER_SIZE = CS310AudioAnalysisProject.BUFFER_SIZE;
@@ -127,7 +127,10 @@ namespace CS310_Audio_Analysis_Project
                         bestPointsY.Add(closestPoints[0].Y);
                         bestPointsY.Add(closestPoints[1].Y);
                     }
-                    frequencyPoints.Add(new FrequencyPoint(new DoublePoint(bestPointsX.Average(), bestPointsY.Average()), j));
+                    frequencyPoints.Add(new FrequencyPoint(
+                        new DoublePoint(bestPointsX.Average(), bestPointsY.Average()),
+                        new Circle[] { circleFront, circleBack, circleLeft, circleRight },
+                        j));
                 }
             }
             drawPoints();
@@ -148,45 +151,21 @@ namespace CS310_Audio_Analysis_Project
             Graphics graphics = Graphics.FromImage(bitmap);
             for (int i = 0; i < frequencyPoints.Count(); i++)
             {
+                Color colour = getColour(i);
+                Circle[] circles = frequencyPoints[i].Circles;
+                for (int j = 0; j < circles.Length; j++)
+                {
+                    Circle circle = circles[j];
+                    graphics.DrawEllipse(
+                        new Pen(colour),
+                        (int)(picAnalysis.Width / 2 + (circle.Center.X - circle.Radius) * SCALE),
+                        (int)(picAnalysis.Height / 2 - (circle.Center.Y - circle.Radius) * SCALE),
+                        (float)circle.Radius * SCALE,
+                        (float)circle.Radius * SCALE);
+                }
                 DoublePoint doublePoint = frequencyPoints[i].DoublePoint;
                 if (!(double.IsNaN(doublePoint.X)) && !(double.IsNaN(doublePoint.Y)))
                 {
-                    double ratio = ((double) frequencyPoints[i].Frequency * 100 / (BUFFER_SIZE - 1)) % 1.0;
-                    byte red = 0;
-                    byte green = 0;
-                    byte blue = 0;
-                    if (ratio <= 1.0 / 6.0)
-                    {
-                        red = 255;
-                        green = (byte)(ratio * 6.0 * 255);
-                    }
-                    else if (ratio <= 2.0 / 6.0)
-                    {
-                        red = (byte)(((2.0 / 6.0) - ratio) * 6.0 * 255);
-                        green = 255;
-                    }
-                    else if (ratio <= 3.0 / 6.0)
-                    {
-                        green = 255;
-                        blue = (byte)((ratio - (2.0 / 6.0)) * 6.0 * 255);
-                         
-                    }
-                    else if (ratio <= 4.0 / 6.0)
-                    {
-                        green = (byte)(((4.0 / 6.0) - ratio) * 6.0 * 255);
-                        blue = 255;
-                    }
-                    else if (ratio <= 5.0 / 6.0)
-                    {
-                        red = (byte)((ratio - (4.0 / 6.0)) * 6.0 * 255);
-                        blue = 255;
-                    }
-                    else
-                    {
-                        red = 255;
-                        blue = (byte)(((6.0 / 6.0) - ratio) * 6.0 * 255);
-                    }
-                    Color colour = Color.FromArgb(red, green, blue);
                     graphics.FillEllipse(
                         new SolidBrush(colour),
                         (int)(picAnalysis.Width / 2 + (doublePoint.X * SCALE) - (SIZE / 2)),
@@ -197,6 +176,46 @@ namespace CS310_Audio_Analysis_Project
             }
             e.Graphics.DrawImage(bitmap, 0, 0, ClientRectangle, GraphicsUnit.Pixel);
             graphics.Dispose();
+        }
+
+        private Color getColour(int i)
+        {
+            double ratio = ((double)frequencyPoints[i].Frequency * 100 / (BUFFER_SIZE - 1)) % 1.0;
+            byte red = 0;
+            byte green = 0;
+            byte blue = 0;
+            if (ratio <= 1.0 / 6.0)
+            {
+                red = 255;
+                green = (byte)(ratio* 6.0 * 255);
+            }
+            else if (ratio <= 2.0 / 6.0)
+            {
+                red = (byte)(((2.0 / 6.0) - ratio) * 6.0 * 255);
+                green = 255;
+            }
+            else if (ratio <= 3.0 / 6.0)
+            {
+                green = 255;
+                blue = (byte)((ratio - (2.0 / 6.0)) * 6.0 * 255);
+
+            }
+            else if (ratio <= 4.0 / 6.0)
+            {
+                green = (byte)(((4.0 / 6.0) - ratio) * 6.0 * 255);
+                blue = 255;
+            }
+            else if (ratio <= 5.0 / 6.0)
+            {
+                red = (byte)((ratio - (4.0 / 6.0)) * 6.0 * 255);
+                blue = 255;
+            }
+            else
+            {
+                red = 255;
+                blue = (byte)(((6.0 / 6.0) - ratio) * 6.0 * 255);
+            }
+            return Color.FromArgb(red, green, blue);
         }
     }
 }

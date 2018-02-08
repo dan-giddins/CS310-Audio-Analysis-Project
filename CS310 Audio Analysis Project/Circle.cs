@@ -14,6 +14,22 @@ namespace CS310_Audio_Analysis_Project
             this.radius = radius;
         }
 
+        public DoublePoint Center
+        {
+            get
+            {
+                return center;
+            }
+        }
+
+        public double Radius
+        {
+            get
+            {
+                return radius;
+            }
+        }
+
         public DoublePoint[] intersect(Circle c)
         {
             double distanceSquared = Math.Pow(center.DistanceTo(c.center), 2);
