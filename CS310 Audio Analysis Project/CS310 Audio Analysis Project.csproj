@@ -104,6 +104,7 @@
     <Compile Include="FrequencyForm.Designer.cs">
       <DependentUpon>FrequencyForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrequencyPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AnalysisForm.resx">
       <DependentUpon>AnalysisForm.cs</DependentUpon>

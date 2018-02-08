@@ -3,7 +3,7 @@ using System;
 
 namespace CS310_Audio_Analysis_Project
 {
-    public class Circle
+    internal class Circle
     {
         private DoublePoint center;
         private double radius;
