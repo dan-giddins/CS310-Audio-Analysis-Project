@@ -10,13 +10,13 @@ namespace CS310_Audio_Analysis_Project
 {
     public partial class AnalysisForm : Form
     {
-        private const int THRESHOLD = 40;
+        private const int THRESHOLD = 20;
         private static byte INPUTS = CS310AudioAnalysisProject.INPUTS;
         private static double[][] frequencyValues = new double[INPUTS][];
         private static int BUFFER_SIZE = CS310AudioAnalysisProject.BUFFER_SIZE;
-        private static double SEPARATION = 0.5;
+        private static double SEPARATION = 0.6;
         private static double ROOTTWO = Math.Sqrt(2);
-        private static float SCALE = 200;
+        private static float SCALE = 20;
         private static int SIZE = 10;
         private static System.Timers.Timer timer;
         private static bool update = true;
@@ -27,6 +27,7 @@ namespace CS310_Audio_Analysis_Project
         private static int next;
         private static DoublePoint[] closestPoints;
         private static List<FrequencyPoint> frequencyPoints = new List<FrequencyPoint>();
+        private delegate void VoidDelegate();
 
         public AnalysisForm()
         {
@@ -82,13 +83,13 @@ namespace CS310_Audio_Analysis_Project
                     back = (br / (bl + br)) - 0.5;
                     left = (fl / (fl + bl)) - 0.5;
                     right = (fr / (fr + br)) - 0.5;
-                    //leftDiag = fl / (fl + br) - ROOTTWO / 2;
-                    //rightDiag = fr / (fr + bl) - ROOTTWO / 2;
+                    //leftDiag = fl / (fl + br) - ROOTTWO * 0.5;
+                    //rightDiag = fr / (fr + bl) - ROOTTWO * 0.5;
                     //front and right
-                    frontR = 1 / (8 * front) - front / 2;
-                    backR = 1 / (8 * back) - back / 2;
-                    leftR = 1 / (8 * left) - left / 2;
-                    rightR = 1 / (8 * right) - right / 2;
+                    frontR = 1 / (8 * front) - front * 0.5;
+                    backR = 1 / (8 * back) - back * 0.5;
+                    leftR = 1 / (8 * left) - left * 0.5;
+                    rightR = 1 / (8 * right) - right * 0.5;
                     circleFront = new Circle(new DoublePoint((front + frontR) * SEPARATION, 0.5 * SEPARATION), frontR * SEPARATION);
                     circleBack = new Circle(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
                     circleLeft = new Circle(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
@@ -129,7 +130,8 @@ namespace CS310_Audio_Analysis_Project
                     }
                     frequencyPoints.Add(new FrequencyPoint(
                         new DoublePoint(bestPointsX.Average(), bestPointsY.Average()),
-                        new Circle[] { circleFront, circleBack, circleLeft, circleRight },
+                        //new Circle[] { circleFront, circleBack, circleLeft, circleRight },
+                        new Circle[] { circleFront },
                         j));
                 }
             }
@@ -139,6 +141,27 @@ namespace CS310_Audio_Analysis_Project
         private void drawPoints()
         {
             picAnalysis.Invalidate();
+            updatePic();
+        }
+
+        private void updatePic()
+        {
+            try
+            {
+                if (picAnalysis.InvokeRequired)
+                {
+                    VoidDelegate d = new VoidDelegate(updatePic);
+                    Invoke(d, new object[] { });
+                }
+                else
+                {
+                    picAnalysis.Update();
+                }
+            }
+            catch (ObjectDisposedException e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         private void picAnalysis_Paint(object sender, PaintEventArgs e)
@@ -149,6 +172,31 @@ namespace CS310_Audio_Analysis_Project
             }
             Bitmap bitmap = new Bitmap(picAnalysis.Width, picAnalysis.Height);
             Graphics graphics = Graphics.FromImage(bitmap);
+            SolidBrush blackBrush = new SolidBrush(Color.Black);
+            graphics.FillRectangle(
+                blackBrush,
+                (int)((picAnalysis.Width * 0.5) + (SEPARATION * SCALE * 0.5) - (SIZE * 0.5)),
+                (int)((picAnalysis.Height * 0.5) - (SEPARATION * SCALE * 0.5) - (SIZE * 0.5)),
+                SIZE,
+                SIZE);
+            graphics.FillRectangle(
+                blackBrush,
+                (int)((picAnalysis.Width * 0.5) + (-SEPARATION * SCALE * 0.5) - (SIZE * 0.5)),
+                (int)((picAnalysis.Height * 0.5) - (SEPARATION * SCALE * 0.5) - (SIZE * 0.5)),
+                SIZE,
+                SIZE);
+            graphics.FillRectangle(
+                blackBrush,
+                (int)((picAnalysis.Width * 0.5) + (SEPARATION * SCALE * 0.5) - (SIZE * 0.5)),
+                (int)((picAnalysis.Height * 0.5) - (-SEPARATION * SCALE * 0.5) - (SIZE * 0.5)),
+                SIZE,
+                SIZE);
+            graphics.FillRectangle(
+                blackBrush,
+                (int)((picAnalysis.Width * 0.5) + (-SEPARATION * SCALE * 0.5) - (SIZE * 0.5)),
+                (int)((picAnalysis.Height * 0.5) - (-SEPARATION * SCALE * 0.5) - (SIZE * 0.5)),
+                SIZE,
+                SIZE);
             for (int i = 0; i < frequencyPoints.Count(); i++)
             {
                 Color colour = getColour(i);
@@ -158,18 +206,18 @@ namespace CS310_Audio_Analysis_Project
                     Circle circle = circles[j];
                     graphics.DrawEllipse(
                         new Pen(colour),
-                        (int)(picAnalysis.Width / 2 + (circle.Center.X - circle.Radius) * SCALE),
-                        (int)(picAnalysis.Height / 2 - (circle.Center.Y - circle.Radius) * SCALE),
-                        (float)circle.Radius * SCALE,
-                        (float)circle.Radius * SCALE);
+                        (int)((picAnalysis.Width * 0.5) + (circle.Center.X - circle.Radius) * SCALE),
+                        (int)((picAnalysis.Height * 0.5) - (circle.Center.Y - circle.Radius) * SCALE),
+                        (int)circle.Radius * SCALE,
+                        (int)circle.Radius * SCALE);
                 }
                 DoublePoint doublePoint = frequencyPoints[i].DoublePoint;
                 if (!(double.IsNaN(doublePoint.X)) && !(double.IsNaN(doublePoint.Y)))
                 {
                     graphics.FillEllipse(
                         new SolidBrush(colour),
-                        (int)(picAnalysis.Width / 2 + (doublePoint.X * SCALE) - (SIZE / 2)),
-                        (int)(picAnalysis.Height / 2 - (doublePoint.Y * SCALE) - (SIZE / 2)),
+                        (int)((picAnalysis.Width * 0.5) + (doublePoint.X * SCALE) - (SIZE * 0.5)),
+                        (int)((picAnalysis.Height * 0.5) - (doublePoint.Y * SCALE) - (SIZE * 0.5)),
                         SIZE,
                         SIZE);
                 }
@@ -187,7 +235,7 @@ namespace CS310_Audio_Analysis_Project
             if (ratio <= 1.0 / 6.0)
             {
                 red = 255;
-                green = (byte)(ratio* 6.0 * 255);
+                green = (byte)(ratio * 6.0 * 255);
             }
             else if (ratio <= 2.0 / 6.0)
             {
@@ -216,6 +264,14 @@ namespace CS310_Audio_Analysis_Project
                 blue = (byte)(((6.0 / 6.0) - ratio) * 6.0 * 255);
             }
             return Color.FromArgb(red, green, blue);
+        }
+
+        private void AnalysisForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            CS310AudioAnalysisProject.allowRecording = false;
+            CS310AudioAnalysisProject.closing = true;
+            CS310AudioAnalysisProject.analysis = false;
+            CS310AudioAnalysisProject.eventWaitHandle.Set();
         }
     }
 }

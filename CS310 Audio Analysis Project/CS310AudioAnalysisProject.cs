@@ -30,9 +30,9 @@ namespace CS310_Audio_Analysis_Project
         private static PictureBox[] picFrequency = new PictureBox[INPUTS];
         private static ComboBox boxDevice;
         private static bool recording;
-        private static bool allowRecording = false;
+        internal static bool allowRecording = false;
         private static bool frequencyDrawing = false;
-        private static bool analysis;
+        internal static bool analysis;
         private static ConfigureInputForm configureInputForm;
         private static FrequencyForm frequencyForm;
         private static AnalysisForm analysisForm;
@@ -43,11 +43,12 @@ namespace CS310_Audio_Analysis_Project
         private delegate void ByteObjectDelegate(object o);
         private delegate object DelegateReturnObject();
         private delegate int DelegateReturnInt();
-        private static EventWaitHandle eventWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+        internal static EventWaitHandle eventWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
         private static bool readFromFile;
         private static WaveFileReader waveFileReader;
         private static System.Timers.Timer timer;
         private static List<Device> deviceMap = new List<Device>();
+        internal static bool closing = false;
 
         [STAThread]
         static void Main()
@@ -85,7 +86,7 @@ namespace CS310_Audio_Analysis_Project
                         }             
                     }
                 }
-                else
+                else if (!closing)
                 {
                     drawTest();
                 }
@@ -112,7 +113,7 @@ namespace CS310_Audio_Analysis_Project
             Application.Run(analysisForm);
         }
 
-        private static void displayDevices()
+        internal static void displayDevices()
         {
             setSelectedIndex();
             setSelectedItem(getItem());
@@ -319,13 +320,11 @@ namespace CS310_Audio_Analysis_Project
         internal static void stopTest()
         {
             timer.Enabled = false;
-            for (byte i = 0; i < INPUTS; i++)
-            {
-                stopRecording(i);
-            }
+            stopRecording();
+            currentDevice.device.Dispose();
         }
 
-        private static void stopRecording(byte i)
+        private static void stopRecording()
         {
             if (recording)
             {

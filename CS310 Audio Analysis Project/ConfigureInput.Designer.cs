@@ -28,8 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnReset = new System.Windows.Forms.Button();
-            this.btnRefresh = new System.Windows.Forms.Button();
             this.lblDevices = new System.Windows.Forms.Label();
             this.picWaveform0 = new System.Windows.Forms.PictureBox();
             this.picWaveform1 = new System.Windows.Forms.PictureBox();
@@ -44,26 +42,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform3)).BeginInit();
             this.SuspendLayout();
-            // 
-            // btnReset
-            // 
-            this.btnReset.Location = new System.Drawing.Point(12, 489);
-            this.btnReset.Name = "btnReset";
-            this.btnReset.Size = new System.Drawing.Size(400, 23);
-            this.btnReset.TabIndex = 1;
-            this.btnReset.Text = "Refresh Input";
-            this.btnReset.UseVisualStyleBackColor = true;
-            this.btnReset.Click += new System.EventHandler(this.btnTest_Click);
-            // 
-            // btnRefresh
-            // 
-            this.btnRefresh.Location = new System.Drawing.Point(419, 489);
-            this.btnRefresh.Name = "btnRefresh";
-            this.btnRefresh.Size = new System.Drawing.Size(400, 23);
-            this.btnRefresh.TabIndex = 3;
-            this.btnRefresh.Text = "Refresh Device List";
-            this.btnRefresh.UseVisualStyleBackColor = true;
-            this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
             // 
             // lblDevices
             // 
@@ -125,9 +103,9 @@
             // 
             // btnFrequencies
             // 
-            this.btnFrequencies.Location = new System.Drawing.Point(115, 518);
+            this.btnFrequencies.Location = new System.Drawing.Point(12, 488);
             this.btnFrequencies.Name = "btnFrequencies";
-            this.btnFrequencies.Size = new System.Drawing.Size(297, 23);
+            this.btnFrequencies.Size = new System.Drawing.Size(400, 28);
             this.btnFrequencies.TabIndex = 7;
             this.btnFrequencies.Text = "Test Frequencies";
             this.btnFrequencies.UseVisualStyleBackColor = true;
@@ -146,9 +124,9 @@
             // 
             // btnAnalyse
             // 
-            this.btnAnalyse.Location = new System.Drawing.Point(419, 518);
+            this.btnAnalyse.Location = new System.Drawing.Point(419, 488);
             this.btnAnalyse.Name = "btnAnalyse";
-            this.btnAnalyse.Size = new System.Drawing.Size(400, 23);
+            this.btnAnalyse.Size = new System.Drawing.Size(400, 53);
             this.btnAnalyse.TabIndex = 9;
             this.btnAnalyse.Text = "Analyse";
             this.btnAnalyse.UseVisualStyleBackColor = true;
@@ -167,9 +145,7 @@
             this.Controls.Add(this.picWaveform1);
             this.Controls.Add(this.picWaveform0);
             this.Controls.Add(this.lblDevices);
-            this.Controls.Add(this.btnRefresh);
             this.Controls.Add(this.boxDevice);
-            this.Controls.Add(this.btnReset);
             this.DoubleBuffered = true;
             this.Name = "ConfigureInputForm";
             this.Text = "Configure Input";
@@ -183,8 +159,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.Button btnReset;
-        private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.Label lblDevices;
         private System.Windows.Forms.PictureBox picWaveform0;
         private System.Windows.Forms.PictureBox picWaveform1;

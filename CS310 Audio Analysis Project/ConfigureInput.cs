@@ -1,11 +1,7 @@
-﻿using NAudio.CoreAudioApi;
-using NAudio.Wave;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
-using System.Timers;
 using System.Windows.Forms;
 
 namespace CS310_Audio_Analysis_Project
@@ -28,15 +24,6 @@ namespace CS310_Audio_Analysis_Project
             {
                 CS310AudioAnalysisProject.updateAudioDevices();
             }  
-        }
-
-        private void btnTest_Click(object sender, EventArgs e)
-        {
-            if (CS310AudioAnalysisProject.getAllowRecording())
-            {
-                CS310AudioAnalysisProject.stopTest();
-                CS310AudioAnalysisProject.test();
-            }
         }
 
         private void boxDevice_SelectedIndexChanged(object sender, EventArgs e)

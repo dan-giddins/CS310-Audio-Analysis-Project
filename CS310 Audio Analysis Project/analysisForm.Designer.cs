@@ -37,7 +37,7 @@
             this.picAnalysis.BackColor = System.Drawing.Color.White;
             this.picAnalysis.Location = new System.Drawing.Point(12, 12);
             this.picAnalysis.Name = "picAnalysis";
-            this.picAnalysis.Size = new System.Drawing.Size(500, 500);
+            this.picAnalysis.Size = new System.Drawing.Size(1192, 534);
             this.picAnalysis.TabIndex = 1;
             this.picAnalysis.TabStop = false;
             this.picAnalysis.Paint += new System.Windows.Forms.PaintEventHandler(this.picAnalysis_Paint);
@@ -46,10 +46,11 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1541, 533);
+            this.ClientSize = new System.Drawing.Size(1216, 558);
             this.Controls.Add(this.picAnalysis);
             this.Name = "AnalysisForm";
             this.Text = "Analysis";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AnalysisForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.picAnalysis)).EndInit();
             this.ResumeLayout(false);
 
