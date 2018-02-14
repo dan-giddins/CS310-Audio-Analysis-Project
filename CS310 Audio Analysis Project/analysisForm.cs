@@ -16,12 +16,12 @@ namespace CS310_Audio_Analysis_Project
         private static int BUFFER_SIZE = CS310AudioAnalysisProject.BUFFER_SIZE;
         private static double SEPARATION = 0.6;
         private static double ROOTTWO = Math.Sqrt(2);
-        private static float SCALE = 20;
+        private static float SCALE = 200;
         private static int SIZE = 10;
         private static System.Timers.Timer timer;
         private static bool update = true;
         private static DoublePoint[][] points = new DoublePoint[4][];
-        private static double a, b, c, d, fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
+        private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
         private static Circle circleFront, circleBack, circleLeft, circleRight;
         private static List<Double> bestPointsX, bestPointsY;
         private static int next;
@@ -66,19 +66,18 @@ namespace CS310_Audio_Analysis_Project
             frequencyPoints = new List<FrequencyPoint>();
             for (int j = 0; j < BUFFER_SIZE; j++)
             {
-                a = Math.Sqrt(frequencyValues[0][j]);
-                b = Math.Sqrt(frequencyValues[1][j]);
-                c = Math.Sqrt(frequencyValues[2][j]);
-                d = Math.Sqrt(frequencyValues[3][j]);
-                if (a + b + c + d > THRESHOLD)
+                if (j == 20) {
+                    j = 20;
+                }
+                fl = Math.Sqrt(frequencyValues[0][j]);
+                fr = Math.Sqrt(frequencyValues[1][j]);
+                bl = Math.Sqrt(frequencyValues[2][j]);
+                br = Math.Sqrt(frequencyValues[3][j]);
+                if (fl + fr + bl + br > THRESHOLD)
                 {
                     //r = 1/8d - d/2
                     //a = d + r
                     //y = (1/2)(yB+yA) + (1/2)(yB-yA)(rA2-rB2)/d2 ± -2(xB-xA)K/d2 
-                    fl = Math.Sqrt(a);
-                    fr = Math.Sqrt(b);
-                    bl = Math.Sqrt(c);
-                    br = Math.Sqrt(d);
                     front = (fr / (fl + fr)) - 0.5;
                     back = (br / (bl + br)) - 0.5;
                     left = (fl / (fl + bl)) - 0.5;
@@ -127,11 +126,14 @@ namespace CS310_Audio_Analysis_Project
                         bestPointsX.Add(closestPoints[1].X);
                         bestPointsY.Add(closestPoints[0].Y);
                         bestPointsY.Add(closestPoints[1].Y);
+                        // Add all points as proper points
                     }
                     frequencyPoints.Add(new FrequencyPoint(
                         new DoublePoint(bestPointsX.Average(), bestPointsY.Average()),
-                        //new Circle[] { circleFront, circleBack, circleLeft, circleRight },
-                        new Circle[] { circleFront },
+                        bestPointsX,
+                        bestPointsY,
+                        new Circle[] { circleFront, circleBack, circleLeft, circleRight },
+                        //new Circle[] { circleFront },
                         j));
                 }
             }
@@ -199,23 +201,42 @@ namespace CS310_Audio_Analysis_Project
                 SIZE);
             for (int i = 0; i < frequencyPoints.Count(); i++)
             {
+                if (frequencyPoints[i].frequency == 20)
+                {
+                    i = i;
+                }
                 Color colour = getColour(i);
-                Circle[] circles = frequencyPoints[i].Circles;
+                Circle[] circles = frequencyPoints[i].circles;
                 for (int j = 0; j < circles.Length; j++)
                 {
                     Circle circle = circles[j];
                     graphics.DrawEllipse(
                         new Pen(colour),
                         (int)((picAnalysis.Width * 0.5) + (circle.Center.X - circle.Radius) * SCALE),
-                        (int)((picAnalysis.Height * 0.5) - (circle.Center.Y - circle.Radius) * SCALE),
-                        (int)circle.Radius * SCALE,
-                        (int)circle.Radius * SCALE);
+                        (int)((picAnalysis.Height * 0.5) - (circle.Center.Y + circle.Radius) * SCALE),
+                        (int)(circle.Radius * SCALE * 2),
+                        (int)(circle.Radius * SCALE * 2));
                 }
-                DoublePoint doublePoint = frequencyPoints[i].DoublePoint;
+                for (int j = 0; j < frequencyPoints[i].bestPointsX.Count(); j++)
+                {
+                    DoublePoint doublePointInter = new DoublePoint(frequencyPoints[i].bestPointsX[j], frequencyPoints[i].bestPointsY[j]);
+                    if (!(double.IsNaN(doublePointInter.X)) && !(double.IsNaN(doublePointInter.Y)))
+                    {
+                        graphics.FillEllipse(
+                            //new SolidBrush(Color.Black),
+                            new SolidBrush(colour),
+                            (int)((picAnalysis.Width * 0.5) + (doublePointInter.X * SCALE) - (SIZE * 0.5)),
+                            (int)((picAnalysis.Height * 0.5) - (doublePointInter.Y * SCALE) - (SIZE * 0.5)),
+                            SIZE,
+                            SIZE);
+                    }
+                }
+                DoublePoint doublePoint = frequencyPoints[i].doublePoint;
                 if (!(double.IsNaN(doublePoint.X)) && !(double.IsNaN(doublePoint.Y)))
                 {
                     graphics.FillEllipse(
-                        new SolidBrush(colour),
+                        new SolidBrush(Color.Black),
+                        //new SolidBrush(colour),
                         (int)((picAnalysis.Width * 0.5) + (doublePoint.X * SCALE) - (SIZE * 0.5)),
                         (int)((picAnalysis.Height * 0.5) - (doublePoint.Y * SCALE) - (SIZE * 0.5)),
                         SIZE,
@@ -228,7 +249,7 @@ namespace CS310_Audio_Analysis_Project
 
         private Color getColour(int i)
         {
-            double ratio = ((double)frequencyPoints[i].Frequency * 100 / (BUFFER_SIZE - 1)) % 1.0;
+            double ratio = ((double)frequencyPoints[i].frequency * 100 / (BUFFER_SIZE - 1)) % 1.0;
             byte red = 0;
             byte green = 0;
             byte blue = 0;

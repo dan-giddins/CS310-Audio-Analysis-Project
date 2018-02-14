@@ -1,12 +1,15 @@
-﻿using Accord;
+﻿using System.Collections.Generic;
+using Accord;
 
 namespace CS310_Audio_Analysis_Project
 {
     internal class FrequencyPoint
     {
-        private DoublePoint doublePoint;
-        private Circle[] circles;
-        private int frequency;
+        internal DoublePoint doublePoint;
+        internal Circle[] circles;
+        internal int frequency;
+        internal List<double> bestPointsX;
+        internal List<double> bestPointsY;
 
         public FrequencyPoint(DoublePoint doublePoint, Circle[] circles, int frequency)
         {
@@ -15,28 +18,13 @@ namespace CS310_Audio_Analysis_Project
             this.frequency = frequency;
         }
 
-        public DoublePoint DoublePoint
+        public FrequencyPoint(DoublePoint doublePoint, List<double> bestPointsX, List<double> bestPointsY, Circle[] circles, int frequency)
         {
-            get
-            {
-                return doublePoint;
-            }
-        }
-
-        public Circle[] Circles
-        {
-            get
-            {
-                return circles;
-            }
-        }
-
-        public int Frequency
-        {
-            get
-            {
-                return frequency;
-            }
+            this.doublePoint = doublePoint;
+            this.bestPointsX = bestPointsX;
+            this.bestPointsY = bestPointsY;
+            this.circles = circles;
+            this.frequency = frequency;
         }
     }
 }

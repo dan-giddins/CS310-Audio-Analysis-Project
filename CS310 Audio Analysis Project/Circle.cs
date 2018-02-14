@@ -11,7 +11,7 @@ namespace CS310_Audio_Analysis_Project
         public Circle(DoublePoint center, double radius)
         {
             this.center = center;
-            this.radius = radius;
+            this.radius = Math.Abs(radius);
         }
 
         public DoublePoint Center
