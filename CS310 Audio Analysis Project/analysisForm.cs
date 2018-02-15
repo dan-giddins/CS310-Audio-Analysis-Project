@@ -11,6 +11,11 @@ namespace CS310_Audio_Analysis_Project
     public partial class AnalysisForm : Form
     {
         private const int THRESHOLD = 20;
+        private const bool DRAW_CIRCLES = false;
+        private const bool DRAW_INTERSECTIONS = false;
+        private const bool DRAW_POINTS = true;
+        private const int SOLO_FREQ = 30;
+        private const bool SOLO = false;
         private static byte INPUTS = CS310AudioAnalysisProject.INPUTS;
         private static double[][] frequencyValues = new double[INPUTS][];
         private static int BUFFER_SIZE = CS310AudioAnalysisProject.BUFFER_SIZE;
@@ -20,14 +25,16 @@ namespace CS310_Audio_Analysis_Project
         private static int SIZE = 10;
         private static System.Timers.Timer timer;
         private static bool update = true;
-        private static DoublePoint[][] points = new DoublePoint[4][];
+        private static DoublePoint[][] points = new DoublePoint[6][];
         private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
         private static Circle circleFront, circleBack, circleLeft, circleRight;
-        private static List<Double> bestPointsX, bestPointsY;
+        private static List<DoublePoint> bestPoints;
         private static int next;
         private static DoublePoint[] closestPoints;
         private static List<FrequencyPoint> frequencyPoints = new List<FrequencyPoint>();
         private delegate void VoidDelegate();
+        private static Double avgX = 0;
+        private static Double avgY = 0;
 
         public AnalysisForm()
         {
@@ -64,15 +71,15 @@ namespace CS310_Audio_Analysis_Project
         private void locateFrequencies()
         {
             frequencyPoints = new List<FrequencyPoint>();
-            for (int j = 0; j < BUFFER_SIZE; j++)
+            for (int i = 0; i < BUFFER_SIZE; i++)
             {
-                if (j == 20) {
-                    j = 20;
+                if (i == 20) {
+                    i = 20;
                 }
-                fl = Math.Sqrt(frequencyValues[0][j]);
-                fr = Math.Sqrt(frequencyValues[1][j]);
-                bl = Math.Sqrt(frequencyValues[2][j]);
-                br = Math.Sqrt(frequencyValues[3][j]);
+                fl = Math.Sqrt(frequencyValues[0][i]);
+                fr = Math.Sqrt(frequencyValues[1][i]);
+                bl = Math.Sqrt(frequencyValues[2][i]);
+                br = Math.Sqrt(frequencyValues[3][i]);
                 if (fl + fr + bl + br > THRESHOLD)
                 {
                     //r = 1/8d - d/2
@@ -94,47 +101,72 @@ namespace CS310_Audio_Analysis_Project
                     circleLeft = new Circle(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
                     circleRight = new Circle(new DoublePoint(0.5 * SEPARATION, (right + rightR) * SEPARATION), rightR * SEPARATION);
                     points[0] = circleFront.intersect(circleLeft);
-                    points[1] = circleLeft.intersect(circleBack);
-                    points[2] = circleBack.intersect(circleRight);
-                    points[3] = circleRight.intersect(circleFront);
-                    bestPointsX = new List<Double>();
-                    bestPointsY = new List<Double>();
-                    for (int i = 0; i < points.Length; i++)
+                    points[1] = circleFront.intersect(circleBack);
+                    points[2] = circleFront.intersect(circleRight);
+                    points[3] = circleLeft.intersect(circleBack);
+                    points[4] = circleLeft.intersect(circleRight);
+                    points[5] = circleBack.intersect(circleRight);
+                    bestPoints = new List<DoublePoint>();
+                    for (int j = 0; j < points.Length; j++)
                     {
-                        next = (i + 1) % points.Length;
-                        distance = points[i][0].DistanceTo(points[next][0]);
-                        closestPoints = new DoublePoint[2] { points[i][0], points[next][0] };
-                        newDistance = points[i][0].DistanceTo(points[next][1]);
+                        next = (j + 1) % points.Length;
+                        distance = points[j][0].DistanceTo(points[next][0]);
+                        closestPoints = new DoublePoint[2] { points[j][0], points[next][0] };
+                        newDistance = points[j][0].DistanceTo(points[next][1]);
                         if (newDistance < distance)
                         {
                             distance = newDistance;
-                            closestPoints = new DoublePoint[2] { points[i][0], points[next][1] };
+                            closestPoints = new DoublePoint[2] { points[j][0], points[next][1] };
                         }
-                        newDistance = points[i][1].DistanceTo(points[next][1]);
+                        newDistance = points[j][1].DistanceTo(points[next][1]);
                         if (newDistance < distance)
                         {
                             distance = newDistance;
-                            closestPoints = new DoublePoint[2] { points[i][1], points[next][1] };
+                            closestPoints = new DoublePoint[2] { points[j][1], points[next][1] };
                         }
-                        newDistance = points[i][1].DistanceTo(points[next][0]);
+                        newDistance = points[j][1].DistanceTo(points[next][0]);
                         if (newDistance < distance)
                         {
                             distance = newDistance;
-                            closestPoints = new DoublePoint[2] { points[i][1], points[next][0] };
+                            closestPoints = new DoublePoint[2] { points[j][1], points[next][0] };
                         }
-                        bestPointsX.Add(closestPoints[0].X);
-                        bestPointsX.Add(closestPoints[1].X);
-                        bestPointsY.Add(closestPoints[0].Y);
-                        bestPointsY.Add(closestPoints[1].Y);
-                        // Add all points as proper points
+                        for (int k = 0; k < closestPoints.Length; k++)
+                        {
+                            if (!double.IsNaN(closestPoints[k].X))
+                            {
+                                bestPoints.Add(closestPoints[k]);
+                            }
+                        }
+                    }
+                    /*{
+                        for (int k = 0; k < points[j].Length; k++)
+                        {
+                            if (!double.IsNaN(points[j][k].X))
+                            {
+                                bestPoints.Add(points[j][k]);
+                            }
+                        }
+                    }*/
+                    if (bestPoints.Count() == 0)
+                    {
+                        avgX = 0;
+                        avgY = 0;
+                    }
+                    else
+                    {
+                        for (int j = 0; j < bestPoints.Count(); j++)
+                        {
+                            avgX += bestPoints[j].X;
+                            avgY += bestPoints[j].Y;
+                        }
+                        avgX = avgX / bestPoints.Count();
+                        avgY = avgY / bestPoints.Count();
                     }
                     frequencyPoints.Add(new FrequencyPoint(
-                        new DoublePoint(bestPointsX.Average(), bestPointsY.Average()),
-                        bestPointsX,
-                        bestPointsY,
+                        new DoublePoint(avgX, avgY),
+                        bestPoints,
                         new Circle[] { circleFront, circleBack, circleLeft, circleRight },
-                        //new Circle[] { circleFront },
-                        j));
+                        i));
                 }
             }
             drawPoints();
@@ -201,46 +233,59 @@ namespace CS310_Audio_Analysis_Project
                 SIZE);
             for (int i = 0; i < frequencyPoints.Count(); i++)
             {
-                if (frequencyPoints[i].frequency == 20)
+                bool flag = false;
+                Color colour = Color.Black;
+                if (SOLO)
                 {
-                    i = i;
-                }
-                Color colour = getColour(i);
-                Circle[] circles = frequencyPoints[i].circles;
-                for (int j = 0; j < circles.Length; j++)
-                {
-                    Circle circle = circles[j];
-                    graphics.DrawEllipse(
-                        new Pen(colour),
-                        (int)((picAnalysis.Width * 0.5) + (circle.Center.X - circle.Radius) * SCALE),
-                        (int)((picAnalysis.Height * 0.5) - (circle.Center.Y + circle.Radius) * SCALE),
-                        (int)(circle.Radius * SCALE * 2),
-                        (int)(circle.Radius * SCALE * 2));
-                }
-                for (int j = 0; j < frequencyPoints[i].bestPointsX.Count(); j++)
-                {
-                    DoublePoint doublePointInter = new DoublePoint(frequencyPoints[i].bestPointsX[j], frequencyPoints[i].bestPointsY[j]);
-                    if (!(double.IsNaN(doublePointInter.X)) && !(double.IsNaN(doublePointInter.Y)))
+                    if (frequencyPoints[i].frequency == SOLO_FREQ)
                     {
+                        flag = true;
+                    }
+                }
+                else
+                {
+                    flag = true;
+                    colour = getColour(i);
+                }
+                if (flag)
+                {
+                    if (DRAW_CIRCLES)
+                    {
+                        Circle[] circles = frequencyPoints[i].circles;
+                        for (int j = 0; j < circles.Length; j++)
+                        {
+                            Circle circle = circles[j];
+                            graphics.DrawEllipse(
+                                new Pen(colour),
+                                (int)((picAnalysis.Width * 0.5) + (circle.Center.X - circle.Radius) * SCALE),
+                                (int)((picAnalysis.Height * 0.5) - (circle.Center.Y + circle.Radius) * SCALE),
+                                (int)(circle.Radius * SCALE * 2),
+                                (int)(circle.Radius * SCALE * 2));
+                        }
+                    }
+                    if (DRAW_INTERSECTIONS)
+                    {
+                        for (int j = 0; j < frequencyPoints[i].points.Count(); j++)
+                        {
+                            DoublePoint doublePointInter = frequencyPoints[i].points[j];
+                            graphics.FillEllipse(
+                                new SolidBrush(colour),
+                                (int)((picAnalysis.Width * 0.5) + (doublePointInter.X * SCALE) - (SIZE * 0.5)),
+                                (int)((picAnalysis.Height * 0.5) - (doublePointInter.Y * SCALE) - (SIZE * 0.5)),
+                                SIZE,
+                                SIZE);
+                        }
+                    }
+                    if (DRAW_POINTS)
+                    {
+                        DoublePoint doublePoint = frequencyPoints[i].doublePoint;
                         graphics.FillEllipse(
-                            //new SolidBrush(Color.Black),
                             new SolidBrush(colour),
-                            (int)((picAnalysis.Width * 0.5) + (doublePointInter.X * SCALE) - (SIZE * 0.5)),
-                            (int)((picAnalysis.Height * 0.5) - (doublePointInter.Y * SCALE) - (SIZE * 0.5)),
+                            (int)((picAnalysis.Width * 0.5) + (doublePoint.X * SCALE) - (SIZE * 0.5)),
+                            (int)((picAnalysis.Height * 0.5) - (doublePoint.Y * SCALE) - (SIZE * 0.5)),
                             SIZE,
                             SIZE);
                     }
-                }
-                DoublePoint doublePoint = frequencyPoints[i].doublePoint;
-                if (!(double.IsNaN(doublePoint.X)) && !(double.IsNaN(doublePoint.Y)))
-                {
-                    graphics.FillEllipse(
-                        new SolidBrush(Color.Black),
-                        //new SolidBrush(colour),
-                        (int)((picAnalysis.Width * 0.5) + (doublePoint.X * SCALE) - (SIZE * 0.5)),
-                        (int)((picAnalysis.Height * 0.5) - (doublePoint.Y * SCALE) - (SIZE * 0.5)),
-                        SIZE,
-                        SIZE);
                 }
             }
             e.Graphics.DrawImage(bitmap, 0, 0, ClientRectangle, GraphicsUnit.Pixel);

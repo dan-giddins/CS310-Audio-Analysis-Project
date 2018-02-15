@@ -8,8 +8,7 @@ namespace CS310_Audio_Analysis_Project
         internal DoublePoint doublePoint;
         internal Circle[] circles;
         internal int frequency;
-        internal List<double> bestPointsX;
-        internal List<double> bestPointsY;
+        internal List<DoublePoint> points;
 
         public FrequencyPoint(DoublePoint doublePoint, Circle[] circles, int frequency)
         {
@@ -18,11 +17,10 @@ namespace CS310_Audio_Analysis_Project
             this.frequency = frequency;
         }
 
-        public FrequencyPoint(DoublePoint doublePoint, List<double> bestPointsX, List<double> bestPointsY, Circle[] circles, int frequency)
+        public FrequencyPoint(DoublePoint doublePoint, List<DoublePoint> points, Circle[] circles, int frequency)
         {
             this.doublePoint = doublePoint;
-            this.bestPointsX = bestPointsX;
-            this.bestPointsY = bestPointsY;
+            this.points = points;
             this.circles = circles;
             this.frequency = frequency;
         }
