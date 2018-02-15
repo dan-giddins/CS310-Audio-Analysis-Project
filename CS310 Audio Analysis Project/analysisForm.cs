@@ -96,10 +96,10 @@ namespace CS310_Audio_Analysis_Project
                     backR = 1 / (8 * back) - back * 0.5;
                     leftR = 1 / (8 * left) - left * 0.5;
                     rightR = 1 / (8 * right) - right * 0.5;
-                    sphereFront = new Circle(new DoublePoint((front + frontR) * SEPARATION, 0.5 * SEPARATION), frontR * SEPARATION);
-                    sphereBack = new Circle(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
-                    sphereLeft = new Circle(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
-                    sphereRight = new Circle(new DoublePoint(0.5 * SEPARATION, (right + rightR) * SEPARATION), rightR * SEPARATION);
+                    sphereFront = new Sphere(new DoublePoint((front + frontR) * SEPARATION, 0.5 * SEPARATION), frontR * SEPARATION);
+                    sphereBack = new Sphere(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
+                    sphereLeft = new Sphere(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
+                    sphereRight = new Sphere(new DoublePoint(0.5 * SEPARATION, (right + rightR) * SEPARATION), rightR * SEPARATION);
                     points[0] = sphereFront.intersect(sphereLeft);
                     points[1] = sphereFront.intersect(sphereBack);
                     points[2] = sphereFront.intersect(sphereRight);
