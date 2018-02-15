@@ -3,18 +3,18 @@ using System;
 
 namespace CS310_Audio_Analysis_Project
 {
-    internal class Circle
+    internal class Sphere
     {
         internal DoublePoint center;
         internal double radius;
 
-        public Circle(DoublePoint center, double radius)
+        public Sphere(DoublePoint center, double radius)
         {
             this.center = center;
             this.radius = Math.Abs(radius);
         }
 
-        public DoublePoint[] intersect(Circle c)
+        public Circle intersect(Circle c)
         {
             double distanceSquared = Math.Pow(center.DistanceTo(c.center), 2);
             double area = Math.Sqrt((Math.Pow(radius + c.radius, 2) - distanceSquared) * (distanceSquared - Math.Pow(radius - c.radius, 2))) / 4;

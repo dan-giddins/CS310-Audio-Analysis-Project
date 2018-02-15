@@ -27,7 +27,7 @@ namespace CS310_Audio_Analysis_Project
         private static bool update = true;
         private static DoublePoint[][] points = new DoublePoint[6][];
         private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
-        private static Circle circleFront, circleBack, circleLeft, circleRight;
+        private static Sphere sphereFront, sphereBack, sphereLeft, sphereRight;
         private static List<DoublePoint> bestPoints;
         private static int next;
         private static DoublePoint[] closestPoints;
@@ -96,16 +96,16 @@ namespace CS310_Audio_Analysis_Project
                     backR = 1 / (8 * back) - back * 0.5;
                     leftR = 1 / (8 * left) - left * 0.5;
                     rightR = 1 / (8 * right) - right * 0.5;
-                    circleFront = new Circle(new DoublePoint((front + frontR) * SEPARATION, 0.5 * SEPARATION), frontR * SEPARATION);
-                    circleBack = new Circle(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
-                    circleLeft = new Circle(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
-                    circleRight = new Circle(new DoublePoint(0.5 * SEPARATION, (right + rightR) * SEPARATION), rightR * SEPARATION);
-                    points[0] = circleFront.intersect(circleLeft);
-                    points[1] = circleFront.intersect(circleBack);
-                    points[2] = circleFront.intersect(circleRight);
-                    points[3] = circleLeft.intersect(circleBack);
-                    points[4] = circleLeft.intersect(circleRight);
-                    points[5] = circleBack.intersect(circleRight);
+                    sphereFront = new Circle(new DoublePoint((front + frontR) * SEPARATION, 0.5 * SEPARATION), frontR * SEPARATION);
+                    sphereBack = new Circle(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
+                    sphereLeft = new Circle(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
+                    sphereRight = new Circle(new DoublePoint(0.5 * SEPARATION, (right + rightR) * SEPARATION), rightR * SEPARATION);
+                    points[0] = sphereFront.intersect(sphereLeft);
+                    points[1] = sphereFront.intersect(sphereBack);
+                    points[2] = sphereFront.intersect(sphereRight);
+                    points[3] = sphereLeft.intersect(sphereBack);
+                    points[4] = sphereLeft.intersect(sphereRight);
+                    points[5] = sphereBack.intersect(sphereRight);
                     bestPoints = new List<DoublePoint>();
                     for (int j = 0; j < points.Length; j++)
                     {
@@ -165,7 +165,7 @@ namespace CS310_Audio_Analysis_Project
                     frequencyPoints.Add(new FrequencyPoint(
                         new DoublePoint(avgX, avgY),
                         bestPoints,
-                        new Circle[] { circleFront, circleBack, circleLeft, circleRight },
+                        new Circle[] { sphereFront, sphereBack, sphereLeft, sphereRight },
                         i));
                 }
             }

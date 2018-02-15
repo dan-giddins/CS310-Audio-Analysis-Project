@@ -89,6 +89,7 @@
     <Compile Include="AnalysisForm.Designer.cs">
       <DependentUpon>AnalysisForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Sphere.cs" />
     <Compile Include="Circle.cs" />
     <Compile Include="ConfigureInput.cs">
       <SubType>Form</SubType>
