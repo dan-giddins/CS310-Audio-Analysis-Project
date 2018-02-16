@@ -25,7 +25,7 @@ namespace CS310_Audio_Analysis_Project
         private static int SIZE = 10;
         private static System.Timers.Timer timer;
         private static bool update = true;
-        private static DoublePoint[][] points = new DoublePoint[6][];
+        private static Circle[] circles = new Circle[6];
         private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
         private static Sphere sphereFront, sphereBack, sphereLeft, sphereRight;
         private static List<DoublePoint> bestPoints;
@@ -33,8 +33,8 @@ namespace CS310_Audio_Analysis_Project
         private static DoublePoint[] closestPoints;
         private static List<FrequencyPoint> frequencyPoints = new List<FrequencyPoint>();
         private delegate void VoidDelegate();
-        private static Double avgX = 0;
-        private static Double avgY = 0;
+        private static double avgX = 0;
+        private static double avgY = 0;
 
         public AnalysisForm()
         {
@@ -100,35 +100,36 @@ namespace CS310_Audio_Analysis_Project
                     sphereBack = new Sphere(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
                     sphereLeft = new Sphere(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
                     sphereRight = new Sphere(new DoublePoint(0.5 * SEPARATION, (right + rightR) * SEPARATION), rightR * SEPARATION);
-                    points[0] = sphereFront.intersect(sphereLeft);
-                    points[1] = sphereFront.intersect(sphereBack);
-                    points[2] = sphereFront.intersect(sphereRight);
-                    points[3] = sphereLeft.intersect(sphereBack);
-                    points[4] = sphereLeft.intersect(sphereRight);
-                    points[5] = sphereBack.intersect(sphereRight);
+                    circles[0] = sphereFront.intersect(sphereLeft);
+                    circles[1] = sphereFront.intersect(sphereBack);
+                    circles[2] = sphereFront.intersect(sphereRight);
+                    circles[3] = sphereLeft.intersect(sphereBack);
+                    circles[4] = sphereLeft.intersect(sphereRight);
+                    circles[5] = sphereBack.intersect(sphereRight);
+
                     bestPoints = new List<DoublePoint>();
-                    for (int j = 0; j < points.Length; j++)
+                    for (int j = 0; j < circles.Length; j++)
                     {
-                        next = (j + 1) % points.Length;
-                        distance = points[j][0].DistanceTo(points[next][0]);
-                        closestPoints = new DoublePoint[2] { points[j][0], points[next][0] };
-                        newDistance = points[j][0].DistanceTo(points[next][1]);
+                        next = (j + 1) % circles.Length;
+                        distance = circles[j][0].DistanceTo(circles[next][0]);
+                        closestPoints = new DoublePoint[2] { circles[j][0], circles[next][0] };
+                        newDistance = circles[j][0].DistanceTo(circles[next][1]);
                         if (newDistance < distance)
                         {
                             distance = newDistance;
-                            closestPoints = new DoublePoint[2] { points[j][0], points[next][1] };
+                            closestPoints = new DoublePoint[2] { circles[j][0], circles[next][1] };
                         }
-                        newDistance = points[j][1].DistanceTo(points[next][1]);
+                        newDistance = circles[j][1].DistanceTo(circles[next][1]);
                         if (newDistance < distance)
                         {
                             distance = newDistance;
-                            closestPoints = new DoublePoint[2] { points[j][1], points[next][1] };
+                            closestPoints = new DoublePoint[2] { circles[j][1], circles[next][1] };
                         }
-                        newDistance = points[j][1].DistanceTo(points[next][0]);
+                        newDistance = circles[j][1].DistanceTo(circles[next][0]);
                         if (newDistance < distance)
                         {
                             distance = newDistance;
-                            closestPoints = new DoublePoint[2] { points[j][1], points[next][0] };
+                            closestPoints = new DoublePoint[2] { circles[j][1], circles[next][0] };
                         }
                         for (int k = 0; k < closestPoints.Length; k++)
                         {
