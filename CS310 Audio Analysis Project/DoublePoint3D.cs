@@ -2,9 +2,9 @@
 {
     public class DoublePoint3D
     {
-        private double x;
-        private double y;
-        private double z;
+        internal double x;
+        internal double y;
+        internal double z;
 
         public DoublePoint3D(double x, double y, double z)
         {

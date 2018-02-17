@@ -11,8 +11,8 @@ namespace CS310_Audio_Analysis_Project
     public partial class AnalysisForm : Form
     {
         private const int THRESHOLD = 20;
-        private const bool DRAW_CIRCLES = false;
-        private const bool DRAW_INTERSECTIONS = false;
+        private const bool DRAW_SPHERES = true;
+        private const bool DRAW_INTERSECTIONS = true;
         private const bool DRAW_POINTS = true;
         private const int SOLO_FREQ = 30;
         private const bool SOLO = false;
@@ -25,16 +25,14 @@ namespace CS310_Audio_Analysis_Project
         private static int SIZE = 10;
         private static System.Timers.Timer timer;
         private static bool update = true;
+        private static Sphere[] spheres = new Sphere[4];
         private static Circle[] circles = new Circle[6];
         private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
-        private static Sphere sphereFront, sphereBack, sphereLeft, sphereRight;
-        private static List<DoublePoint> bestPoints;
+        private static List<DoublePoint3D> bestPoints;
         private static int next;
         private static DoublePoint[] closestPoints;
         private static List<FrequencyPoint> frequencyPoints = new List<FrequencyPoint>();
         private delegate void VoidDelegate();
-        private static double avgX = 0;
-        private static double avgY = 0;
 
         public AnalysisForm()
         {
@@ -96,77 +94,51 @@ namespace CS310_Audio_Analysis_Project
                     backR = 1 / (8 * back) - back * 0.5;
                     leftR = 1 / (8 * left) - left * 0.5;
                     rightR = 1 / (8 * right) - right * 0.5;
-                    sphereFront = new Sphere(new DoublePoint((front + frontR) * SEPARATION, 0.5 * SEPARATION), frontR * SEPARATION);
-                    sphereBack = new Sphere(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
-                    sphereLeft = new Sphere(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
-                    sphereRight = new Sphere(new DoublePoint(0.5 * SEPARATION, (right + rightR) * SEPARATION), rightR * SEPARATION);
-                    circles[0] = sphereFront.intersect(sphereLeft);
-                    circles[1] = sphereFront.intersect(sphereBack);
-                    circles[2] = sphereFront.intersect(sphereRight);
-                    circles[3] = sphereLeft.intersect(sphereBack);
-                    circles[4] = sphereLeft.intersect(sphereRight);
-                    circles[5] = sphereBack.intersect(sphereRight);
-
-                    bestPoints = new List<DoublePoint>();
+                    spheres[0] = new Sphere(new DoublePoint((front + frontR) * SEPARATION, 0.5 * SEPARATION), frontR * SEPARATION);
+                    spheres[1] = new Sphere(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
+                    spheres[2] = new Sphere(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
+                    spheres[3] = new Sphere(new DoublePoint(0.5 * SEPARATION, (right + rightR) * SEPARATION), rightR * SEPARATION);
+                    circles[0] = spheres[0].intersect(spheres[1]);
+                    circles[1] = spheres[0].intersect(spheres[2]);
+                    circles[2] = spheres[0].intersect(spheres[3]);
+                    circles[3] = spheres[1].intersect(spheres[2]);
+                    circles[4] = spheres[1].intersect(spheres[3]);
+                    circles[5] = spheres[2].intersect(spheres[3]);
+                    bestPoints = new List<DoublePoint3D>();
                     for (int j = 0; j < circles.Length; j++)
                     {
-                        next = (j + 1) % circles.Length;
-                        distance = circles[j][0].DistanceTo(circles[next][0]);
-                        closestPoints = new DoublePoint[2] { circles[j][0], circles[next][0] };
-                        newDistance = circles[j][0].DistanceTo(circles[next][1]);
-                        if (newDistance < distance)
+                        if (!double.IsNaN(circles[j].radius))
                         {
-                            distance = newDistance;
-                            closestPoints = new DoublePoint[2] { circles[j][0], circles[next][1] };
-                        }
-                        newDistance = circles[j][1].DistanceTo(circles[next][1]);
-                        if (newDistance < distance)
-                        {
-                            distance = newDistance;
-                            closestPoints = new DoublePoint[2] { circles[j][1], circles[next][1] };
-                        }
-                        newDistance = circles[j][1].DistanceTo(circles[next][0]);
-                        if (newDistance < distance)
-                        {
-                            distance = newDistance;
-                            closestPoints = new DoublePoint[2] { circles[j][1], circles[next][0] };
-                        }
-                        for (int k = 0; k < closestPoints.Length; k++)
-                        {
-                            if (!double.IsNaN(closestPoints[k].X))
+                            for (int k = j + 1; k < circles.Length; k++)
                             {
-                                bestPoints.Add(closestPoints[k]);
+                                if (!double.IsNaN(circles[k].radius))
+                                {
+                                    DoublePoint3D point = circles[j].intersect(circles[k]);
+                                    if (!double.IsNaN(point.x))
+                                    {
+                                        bestPoints.Add(point);
+                                    }
+                                }
                             }
                         }
                     }
-                    /*{
-                        for (int k = 0; k < points[j].Length; k++)
-                        {
-                            if (!double.IsNaN(points[j][k].X))
-                            {
-                                bestPoints.Add(points[j][k]);
-                            }
-                        }
-                    }*/
-                    if (bestPoints.Count() == 0)
+                    DoublePoint3D avgPoint = new DoublePoint3D(0, 0, 0);
+                    for (int j = 0; j < bestPoints.Count(); j++)
                     {
-                        avgX = 0;
-                        avgY = 0;
+                        avgPoint.x += bestPoints[j].x;
+                        avgPoint.y += bestPoints[j].y;
+                        avgPoint.z += bestPoints[j].z;
                     }
-                    else
+                    if (bestPoints.Count() > 0)
                     {
-                        for (int j = 0; j < bestPoints.Count(); j++)
-                        {
-                            avgX += bestPoints[j].X;
-                            avgY += bestPoints[j].Y;
-                        }
-                        avgX = avgX / bestPoints.Count();
-                        avgY = avgY / bestPoints.Count();
+                        avgPoint.x = avgPoint.x / bestPoints.Count();
+                        avgPoint.y = avgPoint.y / bestPoints.Count();
+                        avgPoint.z = avgPoint.z / bestPoints.Count();
                     }
                     frequencyPoints.Add(new FrequencyPoint(
-                        new DoublePoint(avgX, avgY),
+                        avgPoint,
                         bestPoints,
-                        new Circle[] { sphereFront, sphereBack, sphereLeft, sphereRight },
+                        spheres,
                         i));
                 }
             }
@@ -250,40 +222,40 @@ namespace CS310_Audio_Analysis_Project
                 }
                 if (flag)
                 {
-                    if (DRAW_CIRCLES)
+                    if (DRAW_SPHERES)
                     {
-                        Circle[] circles = frequencyPoints[i].circles;
-                        for (int j = 0; j < circles.Length; j++)
+                        Sphere[] spheres = frequencyPoints[i].spheres;
+                        for (int j = 0; j < spheres.Length; j++)
                         {
-                            Circle circle = circles[j];
+                            Sphere sphere = spheres[j];
                             graphics.DrawEllipse(
                                 new Pen(colour),
-                                (int)((picAnalysis.Width * 0.5) + (circle.Center.X - circle.Radius) * SCALE),
-                                (int)((picAnalysis.Height * 0.5) - (circle.Center.Y + circle.Radius) * SCALE),
-                                (int)(circle.Radius * SCALE * 2),
-                                (int)(circle.Radius * SCALE * 2));
+                                (int)((picAnalysis.Width * 0.5) + (sphere.center.X - sphere.radius) * SCALE),
+                                (int)((picAnalysis.Height * 0.5) - (sphere.center.Y + sphere.radius) * SCALE),
+                                (int)(sphere.radius * SCALE * 2),
+                                (int)(sphere.radius * SCALE * 2));
                         }
                     }
                     if (DRAW_INTERSECTIONS)
                     {
                         for (int j = 0; j < frequencyPoints[i].points.Count(); j++)
                         {
-                            DoublePoint doublePointInter = frequencyPoints[i].points[j];
+                            DoublePoint3D doublePointInter = frequencyPoints[i].points[j];
                             graphics.FillEllipse(
                                 new SolidBrush(colour),
-                                (int)((picAnalysis.Width * 0.5) + (doublePointInter.X * SCALE) - (SIZE * 0.5)),
-                                (int)((picAnalysis.Height * 0.5) - (doublePointInter.Y * SCALE) - (SIZE * 0.5)),
+                                (int)((picAnalysis.Width * 0.5) + (doublePointInter.x * SCALE) - (SIZE * 0.5)),
+                                (int)((picAnalysis.Height * 0.5) - (doublePointInter.y * SCALE) - (SIZE * 0.5)),
                                 SIZE,
                                 SIZE);
                         }
                     }
                     if (DRAW_POINTS)
                     {
-                        DoublePoint doublePoint = frequencyPoints[i].doublePoint;
+                        DoublePoint3D doublePoint = frequencyPoints[i].doublePoint;
                         graphics.FillEllipse(
                             new SolidBrush(colour),
-                            (int)((picAnalysis.Width * 0.5) + (doublePoint.X * SCALE) - (SIZE * 0.5)),
-                            (int)((picAnalysis.Height * 0.5) - (doublePoint.Y * SCALE) - (SIZE * 0.5)),
+                            (int)((picAnalysis.Width * 0.5) + (doublePoint.x * SCALE) - (SIZE * 0.5)),
+                            (int)((picAnalysis.Height * 0.5) - (doublePoint.y * SCALE) - (SIZE * 0.5)),
                             SIZE,
                             SIZE);
                     }
