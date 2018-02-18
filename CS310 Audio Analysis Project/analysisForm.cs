@@ -25,7 +25,6 @@ namespace CS310_Audio_Analysis_Project
         private static int SIZE = 10;
         private static System.Timers.Timer timer;
         private static bool update = true;
-        private static Sphere[] spheres = new Sphere[4];
         private static Circle[] circles = new Circle[6];
         private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
         private static List<DoublePoint3D> bestPoints;
@@ -94,6 +93,7 @@ namespace CS310_Audio_Analysis_Project
                     backR = 1 / (8 * back) - back * 0.5;
                     leftR = 1 / (8 * left) - left * 0.5;
                     rightR = 1 / (8 * right) - right * 0.5;
+                    Sphere[] spheres = new Sphere[4];
                     spheres[0] = new Sphere(new DoublePoint((front + frontR) * SEPARATION, 0.5 * SEPARATION), frontR * SEPARATION);
                     spheres[1] = new Sphere(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
                     spheres[2] = new Sphere(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
@@ -148,6 +148,7 @@ namespace CS310_Audio_Analysis_Project
         private void drawPoints()
         {
             picAnalysis.Invalidate();
+
             updatePic();
         }
 
