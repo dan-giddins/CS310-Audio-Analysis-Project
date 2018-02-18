@@ -9,13 +9,15 @@ namespace CS310_Audio_Analysis_Project
         internal double radius;
         internal double gradient;
         internal double intercept;
+        internal DoublePoint[] points;
 
-        public Circle(DoublePoint center, double radius, double gradient, double intercept)
+        public Circle(DoublePoint center, double radius, double gradient, double intercept, DoublePoint[] points)
         {
             this.center = center;
             this.radius = Math.Abs(radius);
             this.gradient = gradient;
             this.intercept = intercept;
+            this.points = points;
         }
 
         public DoublePoint3D intersect(Circle c)

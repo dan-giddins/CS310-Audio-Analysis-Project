@@ -22,12 +22,15 @@ namespace CS310_Audio_Analysis_Project
             double xb = 2 * (s.center.Y - center.Y) * area / distanceSquared;
             double ya = (s.center.Y + center.Y) / 2 + (s.center.Y - center.Y) * (Math.Pow(radius, 2) - Math.Pow(s.radius, 2)) / (2 * distanceSquared);
             double yb = - 2 * (s.center.X - center.X) * area / distanceSquared;
-            //new DoublePoint[2] {new DoublePoint(xa + xb, ya + yb), new DoublePoint(xa - xb, ya - yb)}
             return new Circle(
                 new DoublePoint(xa, ya),
                 Math.Sqrt(Math.Pow(xb, 2) + Math.Pow(yb, 2)),
                 yb / xb,
-                ya - (yb * xa / xb));
+                ya - (yb * xa / xb),
+                new DoublePoint[2] {
+                    new DoublePoint(xa + xb, ya + yb),
+                    new DoublePoint(xa - xb, ya - yb)
+                });
         }
     }
 }

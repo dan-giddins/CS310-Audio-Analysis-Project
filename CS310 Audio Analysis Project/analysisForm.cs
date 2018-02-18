@@ -11,11 +11,12 @@ namespace CS310_Audio_Analysis_Project
     public partial class AnalysisForm : Form
     {
         private const int THRESHOLD = 20;
-        private const bool DRAW_SPHERES = true;
+        private const bool DRAW_SPHERES = false;
         private const bool DRAW_INTERSECTIONS = true;
-        private const bool DRAW_POINTS = true;
+        private const bool DRAW_CIRCLES = true;
+        private const bool DRAW_POINTS = false;
         private const int SOLO_FREQ = 30;
-        private const bool SOLO = false;
+        private const bool SOLO = true;
         private static byte INPUTS = CS310AudioAnalysisProject.INPUTS;
         private static double[][] frequencyValues = new double[INPUTS][];
         private static int BUFFER_SIZE = CS310AudioAnalysisProject.BUFFER_SIZE;
@@ -25,7 +26,6 @@ namespace CS310_Audio_Analysis_Project
         private static int SIZE = 10;
         private static System.Timers.Timer timer;
         private static bool update = true;
-        private static Circle[] circles = new Circle[6];
         private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
         private static List<DoublePoint3D> bestPoints;
         private static int next;
@@ -98,6 +98,7 @@ namespace CS310_Audio_Analysis_Project
                     spheres[1] = new Sphere(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
                     spheres[2] = new Sphere(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
                     spheres[3] = new Sphere(new DoublePoint(0.5 * SEPARATION, (right + rightR) * SEPARATION), rightR * SEPARATION);
+                    Circle[] circles = new Circle[6];
                     circles[0] = spheres[0].intersect(spheres[1]);
                     circles[1] = spheres[0].intersect(spheres[2]);
                     circles[2] = spheres[0].intersect(spheres[3]);
@@ -122,15 +123,15 @@ namespace CS310_Audio_Analysis_Project
                             }
                         }
                     }
-                    DoublePoint3D avgPoint = new DoublePoint3D(0, 0, 0);
-                    for (int j = 0; j < bestPoints.Count(); j++)
-                    {
-                        avgPoint.x += bestPoints[j].x;
-                        avgPoint.y += bestPoints[j].y;
-                        avgPoint.z += bestPoints[j].z;
-                    }
+                    DoublePoint3D avgPoint = new DoublePoint3D(Double.NaN, Double.NaN, Double.NaN);
                     if (bestPoints.Count() > 0)
                     {
+                        for (int j = 0; j < bestPoints.Count(); j++)
+                        {
+                            avgPoint.x += bestPoints[j].x;
+                            avgPoint.y += bestPoints[j].y;
+                            avgPoint.z += bestPoints[j].z;
+                        }
                         avgPoint.x = avgPoint.x / bestPoints.Count();
                         avgPoint.y = avgPoint.y / bestPoints.Count();
                         avgPoint.z = avgPoint.z / bestPoints.Count();
@@ -139,6 +140,7 @@ namespace CS310_Audio_Analysis_Project
                         avgPoint,
                         bestPoints,
                         spheres,
+                        circles,
                         i));
                 }
             }
@@ -241,11 +243,11 @@ namespace CS310_Audio_Analysis_Project
                     {
                         for (int j = 0; j < frequencyPoints[i].points.Count(); j++)
                         {
-                            DoublePoint3D doublePointInter = frequencyPoints[i].points[j];
+                            DoublePoint3D doublePoint = frequencyPoints[i].points[j];
                             graphics.FillEllipse(
                                 new SolidBrush(colour),
-                                (int)((picAnalysis.Width * 0.5) + (doublePointInter.x * SCALE) - (SIZE * 0.5)),
-                                (int)((picAnalysis.Height * 0.5) - (doublePointInter.y * SCALE) - (SIZE * 0.5)),
+                                (int)((picAnalysis.Width * 0.5) + (doublePoint.x * SCALE) - (SIZE * 0.5)),
+                                (int)((picAnalysis.Height * 0.5) - (doublePoint.y * SCALE) - (SIZE * 0.5)),
                                 SIZE,
                                 SIZE);
                         }
@@ -253,12 +255,32 @@ namespace CS310_Audio_Analysis_Project
                     if (DRAW_POINTS)
                     {
                         DoublePoint3D doublePoint = frequencyPoints[i].doublePoint;
-                        graphics.FillEllipse(
+                        if (!double.IsNaN(doublePoint.x))
+                        {
+                            graphics.FillEllipse(
                             new SolidBrush(colour),
                             (int)((picAnalysis.Width * 0.5) + (doublePoint.x * SCALE) - (SIZE * 0.5)),
                             (int)((picAnalysis.Height * 0.5) - (doublePoint.y * SCALE) - (SIZE * 0.5)),
                             SIZE,
                             SIZE);
+                        }
+                    }
+                    if (DRAW_CIRCLES)
+                    {
+                        Circle[] circles = frequencyPoints[i].circles;
+                        for (int j = 0; j < circles.Length; j++)
+                        {
+                            Circle circle = circles[j];
+                            if (!double.IsNaN(circle.points[0].X))
+                            {
+                                graphics.DrawLine(
+                                new Pen(colour),
+                                (int)((picAnalysis.Width * 0.5) + (circle.points[0].X) * SCALE),
+                                (int)((picAnalysis.Height * 0.5) - (circle.points[0].Y) * SCALE),
+                                (int)((picAnalysis.Width * 0.5) + (circle.points[1].X) * SCALE),
+                                (int)((picAnalysis.Height * 0.5) - (circle.points[1].Y) * SCALE));
+                            }
+                        }
                     }
                 }
             }
