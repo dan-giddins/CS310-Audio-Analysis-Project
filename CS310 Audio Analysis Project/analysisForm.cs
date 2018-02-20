@@ -11,9 +11,9 @@ namespace CS310_Audio_Analysis_Project
     public partial class AnalysisForm : Form
     {
         private const int THRESHOLD = 20;
-        private const bool DRAW_SPHERES = true;
+        private const bool DRAW_SPHERES = false;
         private const bool DRAW_INTERSECTIONS = false;
-        private const bool DRAW_CIRCLES = false;
+        private const bool DRAW_CIRCLES = true;
         private const bool DRAW_POINTS = false;
         private const int SOLO_FREQ = 30;
         private const bool SOLO = false;
@@ -261,12 +261,15 @@ namespace CS310_Audio_Analysis_Project
                         for (int j = 0; j < spheres.Length; j++)
                         {
                             Sphere sphere = spheres[j];
-                            graphics.DrawEllipse(
-                                new Pen(colour),
-                                (int)((picAnalysis.Width * 0.5) + (sphere.center.X - sphere.radius) * SCALE),
-                                (int)((picAnalysis.Height * 0.5) - (sphere.center.Y + sphere.radius) * SCALE),
-                                (int)(sphere.radius * SCALE * 2),
-                                (int)(sphere.radius * SCALE * 2));
+                            if (!Double.IsInfinity(sphere.radius))
+                            {
+                                graphics.DrawEllipse(
+                                    new Pen(colour),
+                                    (int)((picAnalysis.Width * 0.5) + (sphere.center.X - sphere.radius) * SCALE),
+                                    (int)((picAnalysis.Height * 0.5) - (sphere.center.Y + sphere.radius) * SCALE),
+                                    (int)(sphere.radius * SCALE * 2),
+                                    (int)(sphere.radius * SCALE * 2));
+                            }
                         }
                     }
                     if (DRAW_INTERSECTIONS)
