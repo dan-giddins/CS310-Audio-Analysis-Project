@@ -16,7 +16,7 @@ namespace CS310_Audio_Analysis_Project
         private const bool DRAW_CIRCLES = false;
         private const bool DRAW_POINTS = false;
         private const int SOLO_FREQ = 30;
-        private const bool SOLO = true;
+        private const bool SOLO = false;
         private static byte INPUTS = CS310AudioAnalysisProject.INPUTS;
         private static double[][] frequencyValues = new double[INPUTS][];
         private static int BUFFER_SIZE = CS310AudioAnalysisProject.BUFFER_SIZE;
@@ -27,7 +27,6 @@ namespace CS310_Audio_Analysis_Project
         private static System.Timers.Timer timer;
         private static bool update = true;
         private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
-        private static List<DoublePoint3D> bestPoints;
         private static int next;
         private static DoublePoint[] closestPoints;
         private static List<FrequencyPoint> frequencyPoints = new List<FrequencyPoint>();
@@ -105,7 +104,38 @@ namespace CS310_Audio_Analysis_Project
                     circles[3] = spheres[1].intersect(spheres[2]);
                     circles[4] = spheres[1].intersect(spheres[3]);
                     circles[5] = spheres[2].intersect(spheres[3]);
-                    bestPoints = new List<DoublePoint3D>();
+                    List<DoublePoint3D> bestPoints = new List<DoublePoint3D>();
+                    /*for (int j = 0; j < circles.Length; j++)
+                    {
+                        next = (j + 1) % points.Length;
+                        distance = points[j][0].DistanceTo(points[next][0]);
+                        closestPoints = new DoublePoint[2] { points[j][0], points[next][0] };
+                        newDistance = points[j][0].DistanceTo(points[next][1]);
+                        if (newDistance < distance)
+                        {
+                            distance = newDistance;
+                            closestPoints = new DoublePoint[2] { points[j][0], points[next][1] };
+                        }
+                        newDistance = points[j][1].DistanceTo(points[next][1]);
+                        if (newDistance < distance)
+                        {
+                            distance = newDistance;
+                            closestPoints = new DoublePoint[2] { points[j][1], points[next][1] };
+                        }
+                        newDistance = points[j][1].DistanceTo(points[next][0]);
+                        if (newDistance < distance)
+                        {
+                            distance = newDistance;
+                            closestPoints = new DoublePoint[2] { points[j][1], points[next][0] };
+                        }
+                        for (int k = 0; k < closestPoints.Length; k++)
+                        {
+                            if (!double.IsNaN(closestPoints[k].X))
+                            {
+                                bestPoints.Add(closestPoints[k]);
+                            }
+                        }
+                    }*/
                     for (int j = 0; j < circles.Length; j++)
                     {
                         if (!double.IsNaN(circles[j].radius))
@@ -258,11 +288,11 @@ namespace CS310_Audio_Analysis_Project
                         if (!double.IsNaN(doublePoint.x))
                         {
                             graphics.FillEllipse(
-                            new SolidBrush(colour),
-                            (int)((picAnalysis.Width * 0.5) + (doublePoint.x * SCALE) - (SIZE * 0.5)),
-                            (int)((picAnalysis.Height * 0.5) - (doublePoint.y * SCALE) - (SIZE * 0.5)),
-                            SIZE,
-                            SIZE);
+                                new SolidBrush(colour),
+                                (int)((picAnalysis.Width * 0.5) + (doublePoint.x * SCALE) - (SIZE * 0.5)),
+                                (int)((picAnalysis.Height * 0.5) - (doublePoint.y * SCALE) - (SIZE * 0.5)),
+                                SIZE,
+                                SIZE);
                         }
                     }
                     if (DRAW_CIRCLES)
