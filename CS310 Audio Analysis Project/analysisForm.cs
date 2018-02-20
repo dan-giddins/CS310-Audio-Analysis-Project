@@ -12,7 +12,7 @@ namespace CS310_Audio_Analysis_Project
     {
         private const int THRESHOLD = 20;
         private const bool DRAW_SPHERES = true;
-        private const bool DRAW_INTERSECTIONS = true;
+        private const bool DRAW_INTERSECTIONS = false;
         private const bool DRAW_CIRCLES = false;
         private const bool DRAW_POINTS = false;
         private const int SOLO_FREQ = 30;
@@ -271,15 +271,25 @@ namespace CS310_Audio_Analysis_Project
                     }
                     if (DRAW_INTERSECTIONS)
                     {
-                        for (int j = 0; j < frequencyPoints[i].points.Count(); j++)
+                        Circle[] circles = frequencyPoints[i].circles;
+                        for (int j = 0; j < circles.Length; j++)
                         {
-                            DoublePoint3D doublePoint = frequencyPoints[i].points[j];
-                            graphics.FillEllipse(
-                                new SolidBrush(colour),
-                                (int)((picAnalysis.Width * 0.5) + (doublePoint.x * SCALE) - (SIZE * 0.5)),
-                                (int)((picAnalysis.Height * 0.5) - (doublePoint.y * SCALE) - (SIZE * 0.5)),
-                                SIZE,
-                                SIZE);
+                            Circle circle = circles[j];
+                            if (!double.IsNaN(circle.points[0].X))
+                            {
+                                graphics.FillEllipse(
+                                    new SolidBrush(colour),
+                                    (int)((picAnalysis.Width * 0.5) + (circle.points[0].X * SCALE) - (SIZE * 0.5)),
+                                    (int)((picAnalysis.Height * 0.5) - (circle.points[0].Y * SCALE) - (SIZE * 0.5)),
+                                    SIZE,
+                                    SIZE);
+                                graphics.FillEllipse(
+                                    new SolidBrush(colour),
+                                    (int)((picAnalysis.Width * 0.5) + (circle.points[1].X * SCALE) - (SIZE * 0.5)),
+                                    (int)((picAnalysis.Height * 0.5) - (circle.points[1].Y * SCALE) - (SIZE * 0.5)),
+                                    SIZE,
+                                    SIZE);
+                            }
                         }
                     }
                     if (DRAW_POINTS)
@@ -304,11 +314,11 @@ namespace CS310_Audio_Analysis_Project
                             if (!double.IsNaN(circle.points[0].X))
                             {
                                 graphics.DrawLine(
-                                new Pen(colour),
-                                (int)((picAnalysis.Width * 0.5) + (circle.points[0].X) * SCALE),
-                                (int)((picAnalysis.Height * 0.5) - (circle.points[0].Y) * SCALE),
-                                (int)((picAnalysis.Width * 0.5) + (circle.points[1].X) * SCALE),
-                                (int)((picAnalysis.Height * 0.5) - (circle.points[1].Y) * SCALE));
+                                    new Pen(colour),
+                                    (int)((picAnalysis.Width * 0.5) + (circle.points[0].X) * SCALE),
+                                    (int)((picAnalysis.Height * 0.5) - (circle.points[0].Y) * SCALE),
+                                    (int)((picAnalysis.Width * 0.5) + (circle.points[1].X) * SCALE),
+                                    (int)((picAnalysis.Height * 0.5) - (circle.points[1].Y) * SCALE));
                             }
                         }
                     }
