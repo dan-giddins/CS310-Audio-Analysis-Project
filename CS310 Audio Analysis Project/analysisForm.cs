@@ -11,9 +11,9 @@ namespace CS310_Audio_Analysis_Project
     public partial class AnalysisForm : Form
     {
         private const int THRESHOLD = 20;
-        private const bool DRAW_SPHERES = false;
+        private const bool DRAW_SPHERES = true;
         private const bool DRAW_INTERSECTIONS = true;
-        private const bool DRAW_CIRCLES = true;
+        private const bool DRAW_CIRCLES = false;
         private const bool DRAW_POINTS = false;
         private const int SOLO_FREQ = 30;
         private const bool SOLO = true;

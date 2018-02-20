@@ -438,7 +438,7 @@ namespace CS310_Audio_Analysis_Project
             int xScale = 1;
             int yPosOld = 0;
             int yPosNew = 0;
-            double yScale = 0.1;
+            double yScale = 0.2;
             for (int j = 0; j < picFrequency[i].Width / xScale; j++)
             {
                 yPosOld = yPosNew;
