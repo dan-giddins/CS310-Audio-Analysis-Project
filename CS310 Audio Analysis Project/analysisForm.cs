@@ -11,15 +11,15 @@ namespace CS310_Audio_Analysis_Project
     public partial class AnalysisForm : Form
     {
         private const int THRESHOLD = 20;
-        private const bool DRAW_CIRCLES = false;
+        private const bool DRAW_CIRCLES = true;
         private const bool DRAW_INTERSECTIONS = false;
         private const bool DRAW_POINTS = true;
         private const int SOLO_FREQ = 30;
-        private const bool SOLO = false;
+        private const bool SOLO = true;
         private static byte INPUTS = CS310AudioAnalysisProject.INPUTS;
         private static double[][] frequencyValues = new double[INPUTS][];
         private static int BUFFER_SIZE = CS310AudioAnalysisProject.BUFFER_SIZE;
-        private static double SEPARATION = 0.6;
+        private static double SEPARATION = 0.5;
         private static double ROOTTWO = Math.Sqrt(2);
         private static float SCALE = 200;
         private static int SIZE = 10;
@@ -28,6 +28,12 @@ namespace CS310_Audio_Analysis_Project
         private static DoublePoint[][] points = new DoublePoint[6][];
         private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
         private static Circle circleFront, circleBack, circleLeft, circleRight;
+
+        private void lblx_Click(object sender, EventArgs e)
+        {
+
+        }
+
         private static List<DoublePoint[]> validPoints;
         private static int next;
         private static DoublePoint[] closestPoints;
@@ -153,6 +159,8 @@ namespace CS310_Audio_Analysis_Project
                     }
                     else
                     {
+                        avgX = 0;
+                        avgY = 0;
                         for (int j = 0; j < bestPoints.Count(); j++)
                         {
                             avgX += bestPoints[j].X;
@@ -254,12 +262,15 @@ namespace CS310_Audio_Analysis_Project
                         for (int j = 0; j < circles.Length; j++)
                         {
                             Circle circle = circles[j];
-                            graphics.DrawEllipse(
-                                new Pen(colour),
-                                (int)((picAnalysis.Width * 0.5) + (circle.Center.X - circle.Radius) * SCALE),
-                                (int)((picAnalysis.Height * 0.5) - (circle.Center.Y + circle.Radius) * SCALE),
-                                (int)(circle.Radius * SCALE * 2),
-                                (int)(circle.Radius * SCALE * 2));
+                            try
+                            {
+                                graphics.DrawEllipse(
+                                    new Pen(colour),
+                                    (int)((picAnalysis.Width * 0.5) + (circle.Center.X - circle.Radius) * SCALE),
+                                    (int)((picAnalysis.Height * 0.5) - (circle.Center.Y + circle.Radius) * SCALE),
+                                    (int)(circle.Radius * SCALE * 2),
+                                    (int)(circle.Radius * SCALE * 2));
+                            } catch (OverflowException oe) { }
                         }
                     }
                     if (DRAW_INTERSECTIONS)
@@ -286,6 +297,13 @@ namespace CS310_Audio_Analysis_Project
                                 (int)((picAnalysis.Height * 0.5) - (doublePoint.Y * SCALE) - (SIZE * 0.5)),
                                 SIZE,
                                 SIZE);
+                        }
+                        if (SOLO)
+                        {
+                            lblX.Text = "X: " + (float)doublePoint.X;
+                            lblY.Text = "Y: " + (float)doublePoint.Y;
+                            float loss = (float)Math.Sqrt(Math.Pow(doublePoint.X - Convert.ToDouble(txtX.Text), 2) + Math.Pow(doublePoint.Y - Convert.ToDouble(txtY.Text), 2));
+                            lblError.Text = "Error: " + loss;
                         }
                     }
                 }
