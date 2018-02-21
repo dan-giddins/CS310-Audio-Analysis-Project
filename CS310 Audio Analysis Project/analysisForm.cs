@@ -28,7 +28,7 @@ namespace CS310_Audio_Analysis_Project
         private static DoublePoint[][] points = new DoublePoint[6][];
         private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
         private static Circle circleFront, circleBack, circleLeft, circleRight;
-        private static List<DoublePoint> bestPoints;
+        private static List<DoublePoint[]> validPoints;
         private static int next;
         private static DoublePoint[] closestPoints;
         private static List<FrequencyPoint> frequencyPoints = new List<FrequencyPoint>();
@@ -106,29 +106,37 @@ namespace CS310_Audio_Analysis_Project
                     points[3] = circleLeft.intersect(circleBack);
                     points[4] = circleLeft.intersect(circleRight);
                     points[5] = circleBack.intersect(circleRight);
-                    bestPoints = new List<DoublePoint>();
+                    validPoints = new List<DoublePoint[]>();
                     for (int j = 0; j < points.Length; j++)
                     {
-                        next = (j + 1) % points.Length;
-                        distance = points[j][0].DistanceTo(points[next][0]);
-                        closestPoints = new DoublePoint[2] { points[j][0], points[next][0] };
-                        newDistance = points[j][0].DistanceTo(points[next][1]);
-                        if (newDistance < distance)
+                        if (!double.IsNaN(points[j][0].X))
                         {
-                            distance = newDistance;
-                            closestPoints = new DoublePoint[2] { points[j][0], points[next][1] };
+                            validPoints.Add(points[j]);
                         }
-                        newDistance = points[j][1].DistanceTo(points[next][1]);
+                    }
+                    List<DoublePoint> bestPoints = new List<DoublePoint>();
+                    for (int j = 0; j < validPoints.Count(); j++)
+                    {
+                        next = (j + 1) % validPoints.Count();
+                        distance = validPoints[j][0].DistanceTo(validPoints[next][0]);
+                        closestPoints = new DoublePoint[2] { validPoints[j][0], validPoints[next][0] };
+                        newDistance = validPoints[j][0].DistanceTo(validPoints[next][1]);
                         if (newDistance < distance)
                         {
                             distance = newDistance;
-                            closestPoints = new DoublePoint[2] { points[j][1], points[next][1] };
+                            closestPoints = new DoublePoint[2] { validPoints[j][0], validPoints[next][1] };
                         }
-                        newDistance = points[j][1].DistanceTo(points[next][0]);
+                        newDistance = validPoints[j][1].DistanceTo(validPoints[next][1]);
                         if (newDistance < distance)
                         {
                             distance = newDistance;
-                            closestPoints = new DoublePoint[2] { points[j][1], points[next][0] };
+                            closestPoints = new DoublePoint[2] { validPoints[j][1], validPoints[next][1] };
+                        }
+                        newDistance = validPoints[j][1].DistanceTo(validPoints[next][0]);
+                        if (newDistance < distance)
+                        {
+                            distance = newDistance;
+                            closestPoints = new DoublePoint[2] { validPoints[j][1], validPoints[next][0] };
                         }
                         for (int k = 0; k < closestPoints.Length; k++)
                         {
@@ -138,19 +146,10 @@ namespace CS310_Audio_Analysis_Project
                             }
                         }
                     }
-                    /*{
-                        for (int k = 0; k < points[j].Length; k++)
-                        {
-                            if (!double.IsNaN(points[j][k].X))
-                            {
-                                bestPoints.Add(points[j][k]);
-                            }
-                        }
-                    }*/
                     if (bestPoints.Count() == 0)
                     {
-                        avgX = 0;
-                        avgY = 0;
+                        avgX = double.NaN;
+                        avgY = double.NaN;
                     }
                     else
                     {
@@ -279,12 +278,15 @@ namespace CS310_Audio_Analysis_Project
                     if (DRAW_POINTS)
                     {
                         DoublePoint doublePoint = frequencyPoints[i].doublePoint;
-                        graphics.FillEllipse(
-                            new SolidBrush(colour),
-                            (int)((picAnalysis.Width * 0.5) + (doublePoint.X * SCALE) - (SIZE * 0.5)),
-                            (int)((picAnalysis.Height * 0.5) - (doublePoint.Y * SCALE) - (SIZE * 0.5)),
-                            SIZE,
-                            SIZE);
+                        if (!double.IsNaN(doublePoint.X))
+                        {
+                            graphics.FillEllipse(
+                                new SolidBrush(colour),
+                                (int)((picAnalysis.Width * 0.5) + (doublePoint.X * SCALE) - (SIZE * 0.5)),
+                                (int)((picAnalysis.Height * 0.5) - (doublePoint.Y * SCALE) - (SIZE * 0.5)),
+                                SIZE,
+                                SIZE);
+                        }
                     }
                 }
             }
