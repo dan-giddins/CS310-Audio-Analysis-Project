@@ -34,6 +34,8 @@
             this.txtX = new System.Windows.Forms.TextBox();
             this.txtY = new System.Windows.Forms.TextBox();
             this.lblError = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picAnalysis)).BeginInit();
             this.SuspendLayout();
             // 
@@ -50,7 +52,7 @@
             // lblX
             // 
             this.lblX.AutoSize = true;
-            this.lblX.Location = new System.Drawing.Point(1317, 16);
+            this.lblX.Location = new System.Drawing.Point(118, 555);
             this.lblX.Name = "lblX";
             this.lblX.Size = new System.Drawing.Size(35, 13);
             this.lblX.TabIndex = 2;
@@ -60,7 +62,7 @@
             // lblY
             // 
             this.lblY.AutoSize = true;
-            this.lblY.Location = new System.Drawing.Point(1317, 42);
+            this.lblY.Location = new System.Drawing.Point(118, 581);
             this.lblY.Name = "lblY";
             this.lblY.Size = new System.Drawing.Size(35, 13);
             this.lblY.TabIndex = 2;
@@ -68,14 +70,14 @@
             // 
             // txtX
             // 
-            this.txtX.Location = new System.Drawing.Point(1211, 13);
+            this.txtX.Location = new System.Drawing.Point(12, 552);
             this.txtX.Name = "txtX";
             this.txtX.Size = new System.Drawing.Size(100, 20);
             this.txtX.TabIndex = 3;
             // 
             // txtY
             // 
-            this.txtY.Location = new System.Drawing.Point(1210, 39);
+            this.txtY.Location = new System.Drawing.Point(11, 578);
             this.txtY.Name = "txtY";
             this.txtY.Size = new System.Drawing.Size(100, 20);
             this.txtY.TabIndex = 3;
@@ -83,17 +85,37 @@
             // lblError
             // 
             this.lblError.AutoSize = true;
-            this.lblError.Location = new System.Drawing.Point(1211, 66);
+            this.lblError.Location = new System.Drawing.Point(12, 605);
             this.lblError.Name = "lblError";
             this.lblError.Size = new System.Drawing.Size(35, 13);
             this.lblError.TabIndex = 4;
             this.lblError.Text = "label1";
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(232, 555);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(35, 13);
+            this.label1.TabIndex = 5;
+            this.label1.Text = "label1";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(232, 578);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(35, 13);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "label1";
+            // 
             // AnalysisForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1590, 558);
+            this.ClientSize = new System.Drawing.Size(1220, 728);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.lblError);
             this.Controls.Add(this.txtY);
             this.Controls.Add(this.txtX);
@@ -116,5 +138,7 @@
         private System.Windows.Forms.TextBox txtX;
         private System.Windows.Forms.TextBox txtY;
         private System.Windows.Forms.Label lblError;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }

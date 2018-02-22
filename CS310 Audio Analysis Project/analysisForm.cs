@@ -19,7 +19,7 @@ namespace CS310_Audio_Analysis_Project
         private static byte INPUTS = CS310AudioAnalysisProject.INPUTS;
         private static double[][] frequencyValues = new double[INPUTS][];
         private static int BUFFER_SIZE = CS310AudioAnalysisProject.BUFFER_SIZE;
-        private static double SEPARATION = 0.5;
+        private static double SEPARATION = 0.6;
         private static double ROOTTWO = Math.Sqrt(2);
         private static float SCALE = 200;
         private static int SIZE = 10;
@@ -302,7 +302,12 @@ namespace CS310_Audio_Analysis_Project
                         {
                             lblX.Text = "X: " + (float)doublePoint.X;
                             lblY.Text = "Y: " + (float)doublePoint.Y;
-                            float loss = (float)Math.Sqrt(Math.Pow(doublePoint.X - Convert.ToDouble(txtX.Text), 2) + Math.Pow(doublePoint.Y - Convert.ToDouble(txtY.Text), 2));
+                            float x = 0;
+                            float y = 0;
+                            bool isNumeric = float.TryParse(txtX.Text, out x) && float.TryParse(txtY.Text, out y);
+                            label1.Text = Convert.ToString(x);
+                            label2.Text = Convert.ToString(y);
+                            float loss = (float)Math.Sqrt(Math.Pow(doublePoint.X - x, 2) + Math.Pow(doublePoint.Y - y, 2));
                             lblError.Text = "Error: " + loss;
                         }
                     }
