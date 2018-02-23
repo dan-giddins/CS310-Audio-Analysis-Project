@@ -19,7 +19,7 @@ namespace CS310_Audio_Analysis_Project
         private static byte INPUTS = CS310AudioAnalysisProject.INPUTS;
         private static double[][] frequencyValues = new double[INPUTS][];
         private static int BUFFER_SIZE = CS310AudioAnalysisProject.BUFFER_SIZE;
-        private static double SEPARATION = 0.6;
+        private static double SEPARATION = 1.2;
         private static double ROOTTWO = Math.Sqrt(2);
         private static float SCALE = 200;
         private static int SIZE = 10;
