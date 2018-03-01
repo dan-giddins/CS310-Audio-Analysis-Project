@@ -150,7 +150,7 @@
             this.txtExpander.Name = "txtExpander";
             this.txtExpander.Size = new System.Drawing.Size(100, 20);
             this.txtExpander.TabIndex = 6;
-            this.txtExpander.Text = "2";
+            this.txtExpander.Text = "1.5";
             this.txtExpander.TextChanged += new System.EventHandler(this.txtExpander_TextChanged);
             // 
             // label3
