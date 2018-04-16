@@ -91,6 +91,7 @@
             this.txtX.Name = "txtX";
             this.txtX.Size = new System.Drawing.Size(100, 20);
             this.txtX.TabIndex = 3;
+            this.txtX.Text = "0";
             // 
             // txtY
             // 
@@ -98,6 +99,7 @@
             this.txtY.Name = "txtY";
             this.txtY.Size = new System.Drawing.Size(100, 20);
             this.txtY.TabIndex = 3;
+            this.txtY.Text = "0";
             // 
             // lblError
             // 
@@ -123,7 +125,7 @@
             this.txtThreshold.Name = "txtThreshold";
             this.txtThreshold.Size = new System.Drawing.Size(100, 20);
             this.txtThreshold.TabIndex = 3;
-            this.txtThreshold.Text = "20";
+            this.txtThreshold.Text = "40";
             this.txtThreshold.TextChanged += new System.EventHandler(this.txtThreshold_TextChanged);
             // 
             // label2
@@ -168,7 +170,7 @@
             this.txtGroup.Name = "txtGroup";
             this.txtGroup.Size = new System.Drawing.Size(100, 20);
             this.txtGroup.TabIndex = 6;
-            this.txtGroup.Text = "0.01";
+            this.txtGroup.Text = "0.05";
             this.txtGroup.TextChanged += new System.EventHandler(this.txtGroup_TextChanged);
             // 
             // label4
@@ -299,7 +301,7 @@
             this.txtSeparation.Name = "txtSeparation";
             this.txtSeparation.Size = new System.Drawing.Size(100, 20);
             this.txtSeparation.TabIndex = 3;
-            this.txtSeparation.Text = "0.6";
+            this.txtSeparation.Text = "0.5";
             this.txtSeparation.TextChanged += new System.EventHandler(this.txtSeparation_TextChanged);
             // 
             // AnalysisForm
@@ -334,7 +336,7 @@
             this.Controls.Add(this.lblX);
             this.Controls.Add(this.picAnalysis);
             this.Name = "AnalysisForm";
-            this.Text = "Analysis";
+            this.Text = "Entity Analysis";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AnalysisForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.picAnalysis)).EndInit();
             this.ResumeLayout(false);

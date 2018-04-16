@@ -3,6 +3,7 @@ using System;
 
 namespace CS310_Audio_Analysis_Project
 {
+    // circle class
     internal class Circle
     {
         private DoublePoint center;

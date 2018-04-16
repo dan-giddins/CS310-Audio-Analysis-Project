@@ -2,6 +2,7 @@
 
 namespace CS310_Audio_Analysis_Project
 {
+    // frequency user view
     public partial class FrequencyForm : Form
     {
         public FrequencyForm()

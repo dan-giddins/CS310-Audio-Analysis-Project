@@ -3,6 +3,7 @@ using NAudio.Wave;
 
 namespace CS310_Audio_Analysis_Project
 {
+    // class to encapsulate device and number of channels
     class Device
     {
         public AsioOut device;

@@ -6,6 +6,7 @@ using System.Windows.Forms;
 
 namespace CS310_Audio_Analysis_Project
 {
+    // configure view
     public partial class ConfigureInputForm : Form
     {
         private delegate void VoidDelegate();
@@ -96,11 +97,6 @@ namespace CS310_Audio_Analysis_Project
         private void btnFrequencies_Click(object sender, EventArgs e)
         {
             CS310AudioAnalysisProject.startFrequencyThread();
-        }
-
-        private void chkReadFile_CheckedChanged(object sender, EventArgs e)
-        {
-            CS310AudioAnalysisProject.chkReadFileChanged(chkReadFile.Checked);
         }
 
         private void btnAnalysise_Click(object sender, EventArgs e)

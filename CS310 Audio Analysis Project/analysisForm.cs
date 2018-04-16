@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 namespace CS310_Audio_Analysis_Project
 {
+    // analyis view and computation
     public partial class AnalysisForm : Form
     {
         private static int THRESHOLD;
@@ -29,18 +30,16 @@ namespace CS310_Audio_Analysis_Project
         private static double ROOTTWO = Math.Sqrt(2);
         private static System.Timers.Timer timer;
         private static bool update = true;
-        private static DoublePoint[][] points = new DoublePoint[6][];
-        private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR, distance, newDistance;
+        private static DoublePoint[][] points = new DoublePoint[4][];
+        private static double fl, fr, bl, br, front, back, left, right, frontR, backR, leftR, rightR;
         private static Circle circleFront, circleBack, circleLeft, circleRight;
-        private static List<DoublePoint[]> validPoints;
-        private static int next;
-        private static DoublePoint[] closestPoints;
         private static List<FrequencyPoint> frequencyPoints = new List<FrequencyPoint>();
         private static List<FrequencyPoint> entityPoints = new List<FrequencyPoint>();
         private delegate void VoidDelegate();
         private static Double avgX = 0;
         private static Double avgY = 0;
 
+        // ui update controls
         private void txtScale_TextChanged(object sender, EventArgs e)
         {
             float.TryParse(txtScale.Text, out SCALE);
@@ -63,7 +62,7 @@ namespace CS310_Audio_Analysis_Project
 
         private void txtFreq_TextChanged(object sender, EventArgs e)
         {
-            int.TryParse(txtThreshold.Text, out SOLO_FREQ);
+            int.TryParse(txtFreq.Text, out SOLO_FREQ);
         }
 
         private void txtExpander_TextChanged(object sender, EventArgs e)
@@ -113,7 +112,7 @@ namespace CS310_Audio_Analysis_Project
             int.TryParse(txtSize.Text, out SIZE);
             double.TryParse(txtSeparation.Text, out SEPARATION);
             int.TryParse(txtThreshold.Text, out THRESHOLD);
-            int.TryParse(txtThreshold.Text, out SOLO_FREQ);
+            int.TryParse(txtFreq.Text, out SOLO_FREQ);
             double.TryParse(txtExpander.Text, out EXPANDER);
             double.TryParse(txtGroup.Text, out GROUP);
             DRAW_CIRCLES = chkCircles.Checked;
@@ -122,6 +121,7 @@ namespace CS310_Audio_Analysis_Project
             SOLO = chkSolo.Checked;
             ENTITIES = chkEntities.Checked;
             ALL = chkAll.Checked;
+            // drawing timer
             timer = new System.Timers.Timer(15);
             timer.Enabled = false;
             timer.Elapsed += new ElapsedEventHandler(timer_Tick);
@@ -129,6 +129,7 @@ namespace CS310_Audio_Analysis_Project
 
         internal void copyFrequencyData(double[][] frequencyValues, byte i)
         {
+            // copy data into thread
             if (update)
             {
                 timer.Stop();
@@ -146,6 +147,7 @@ namespace CS310_Audio_Analysis_Project
         {
             update = false;
             timer.Stop();
+            // perform location calculations
             locateFrequencies();
             timer.Start();
             update = true;
@@ -155,6 +157,7 @@ namespace CS310_Audio_Analysis_Project
         {
             frequencyPoints = new List<FrequencyPoint>();
             entityPoints = new List<FrequencyPoint>();
+            // for each frequency
             for (int i = 0; i < BUFFER_SIZE; i++)
             {
                 if (i == 20) {
@@ -164,11 +167,13 @@ namespace CS310_Audio_Analysis_Project
                 fr = Math.Sqrt(frequencyValues[1][i]);
                 bl = Math.Sqrt(frequencyValues[2][i]);
                 br = Math.Sqrt(frequencyValues[3][i]);
+                // if frequency values are above a threshold
                 if (fl + fr + bl + br > THRESHOLD)
                 {
                     //r = 1/8d - d/2
                     //a = d + r
                     //y = (1/2)(yB+yA) + (1/2)(yB-yA)(rA2-rB2)/d2 ± -2(xB-xA)K/d2 
+                    // calculate ratios
                     front = ((fr/ (fl + fr)) - 0.5) * EXPANDER;
                     back = ((br / (bl + br)) - 0.5) * EXPANDER;
                     left = ((fl / (fl + bl)) - 0.5) * EXPANDER;
@@ -176,21 +181,23 @@ namespace CS310_Audio_Analysis_Project
                     //leftDiag = fl / (fl + br) - ROOTTWO * 0.5;
                     //rightDiag = fr / (fr + bl) - ROOTTWO * 0.5;
                     //front and right
+                    // radiuses
                     frontR = 1 / (8 * front) - front * 0.5;
                     backR = 1 / (8 * back) - back * 0.5;
                     leftR = 1 / (8 * left) - left * 0.5;
                     rightR = 1 / (8 * right) - right * 0.5;
+                    // circles
                     circleFront = new Circle(new DoublePoint((front + frontR) * SEPARATION, 0.5 * SEPARATION), frontR * SEPARATION);
                     circleBack = new Circle(new DoublePoint((back + backR) * SEPARATION, -0.5 * SEPARATION), backR * SEPARATION);
                     circleLeft = new Circle(new DoublePoint(-0.5 * SEPARATION, (left + leftR) * SEPARATION), leftR * SEPARATION);
                     circleRight = new Circle(new DoublePoint(0.5 * SEPARATION, (right + rightR) * SEPARATION), rightR * SEPARATION);
+                    // intersection points
                     points[0] = circleFront.intersect(circleLeft);
-                    points[1] = circleFront.intersect(circleBack);
-                    points[2] = circleFront.intersect(circleRight);
-                    points[3] = circleLeft.intersect(circleBack);
-                    points[4] = circleLeft.intersect(circleRight);
-                    points[5] = circleBack.intersect(circleRight);
+                    points[1] = circleFront.intersect(circleRight);
+                    points[2] = circleBack.intersect(circleLeft);
+                    points[3] = circleBack.intersect(circleRight);
                     List<DoublePoint> bestPoints = new List<DoublePoint>();
+                    // get internal points
                     for (int j = 0; j < points.Length; j++)
                     {
                         if (!double.IsNaN(points[j][0].X))
@@ -205,6 +212,7 @@ namespace CS310_Audio_Analysis_Project
                             }
                         }
                     }
+                    // calculate average
                     if (bestPoints.Count() == 0)
                     {
                         avgX = double.NaN;
@@ -222,6 +230,7 @@ namespace CS310_Audio_Analysis_Project
                         avgX = avgX / bestPoints.Count();
                         avgY = avgY / bestPoints.Count();
                     }
+                    // add to list
                     frequencyPoints.Add(new FrequencyPoint(
                         new DoublePoint(avgX, avgY),
                         bestPoints,
@@ -236,6 +245,7 @@ namespace CS310_Audio_Analysis_Project
                     bool added = false;
                     for (int j = 0; j < entityPoints.Count(); j++)
                     {
+                        // group close points together as an entity
                         if (frequencyPoints[i].doublePoint.DistanceTo(entityPoints[j].doublePoint) < GROUP)
                         {
                             entityPoints[j].points.Add(frequencyPoints[i].doublePoint);
@@ -245,6 +255,7 @@ namespace CS310_Audio_Analysis_Project
                     }
                     if (!added)
                     {
+                        // make a new entity if point is not close to other entity
                         List<DoublePoint> list = new List<DoublePoint>();
                         list.Add(frequencyPoints[i].doublePoint);
                         entityPoints.Add(new FrequencyPoint(
@@ -293,6 +304,7 @@ namespace CS310_Audio_Analysis_Project
             Bitmap bitmap = new Bitmap(picAnalysis.Width, picAnalysis.Height);
             Graphics graphics = Graphics.FromImage(bitmap);
             SolidBrush blackBrush = new SolidBrush(Color.Black);
+            // draw microphones
             graphics.FillRectangle(
                 blackBrush,
                 (int)((picAnalysis.Width * 0.5) + (SEPARATION * SCALE * 0.5) - (SIZE * 0.5)),
@@ -317,6 +329,7 @@ namespace CS310_Audio_Analysis_Project
                 (int)((picAnalysis.Height * 0.5) - (-SEPARATION * SCALE * 0.5) - (SIZE * 0.5)),
                 SIZE,
                 SIZE);
+            // draw entites
             if (ENTITIES)
             {
                 for (int i = 0; i < entityPoints.Count(); i++)
@@ -327,6 +340,7 @@ namespace CS310_Audio_Analysis_Project
                     {
                         for (int j = 0; j < entityPoints[i].points.Count(); j++)
                         {
+                            // draw every frequency point
                             graphics.FillEllipse(
                                 new SolidBrush(colour),
                                 (int)((picAnalysis.Width * 0.5) + (entityPoints[i].points[j].X * SCALE) - (SIZE * 0.5)),
@@ -368,6 +382,7 @@ namespace CS310_Audio_Analysis_Project
                     {
                         if (DRAW_CIRCLES)
                         {
+                            // draw loci circles
                             Circle[] circles = frequencyPoints[i].circles;
                             for (int j = 0; j < circles.Length; j++)
                             {
@@ -380,11 +395,12 @@ namespace CS310_Audio_Analysis_Project
                                         (int)((picAnalysis.Height * 0.5) - (circle.Center.Y + circle.Radius) * SCALE),
                                         (int)(circle.Radius * SCALE * 2),
                                         (int)(circle.Radius * SCALE * 2));
-                                } catch (OverflowException oe) { }
+                                } catch (OverflowException) { }
                             }
                         }
                         if (DRAW_INTERSECTIONS)
                         {
+                            // draw intersection points
                             for (int j = 0; j < frequencyPoints[i].points.Count(); j++)
                             {
                                 DoublePoint doublePointInter = frequencyPoints[i].points[j];
@@ -398,6 +414,7 @@ namespace CS310_Audio_Analysis_Project
                         }
                         if (DRAW_POINTS)
                         {
+                            // draw frequency points
                             DoublePoint doublePoint = frequencyPoints[i].doublePoint;
                             if (!double.IsNaN(doublePoint.X))
                             {
@@ -410,6 +427,7 @@ namespace CS310_Audio_Analysis_Project
                             }
                             if (SOLO)
                             {
+                                // calculate and draw error 
                                 lblX.Text = "X: " + (float)doublePoint.X;
                                 lblY.Text = "Y: " + (float)doublePoint.Y;
                                 float x = 0;
@@ -429,6 +447,7 @@ namespace CS310_Audio_Analysis_Project
 
         private Color getColour(int i)
         {
+            // calculate drawing colour for a given frequency
             double ratio = ((double)i * 100 / (BUFFER_SIZE - 1)) % 1.0;
             byte red = 0;
             byte green = 0;
@@ -469,6 +488,7 @@ namespace CS310_Audio_Analysis_Project
 
         private void AnalysisForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // handle form closing event and cleanup
             CS310AudioAnalysisProject.allowRecording = false;
             CS310AudioAnalysisProject.closing = true;
             CS310AudioAnalysisProject.analysis = false;

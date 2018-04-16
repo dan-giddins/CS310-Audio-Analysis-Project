@@ -3,6 +3,7 @@ using Accord;
 
 namespace CS310_Audio_Analysis_Project
 {
+    // class encapuslating information for a single frequency
     internal class FrequencyPoint
     {
         internal DoublePoint doublePoint;

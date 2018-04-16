@@ -35,7 +35,6 @@
             this.picWaveform3 = new System.Windows.Forms.PictureBox();
             this.boxDevice = new System.Windows.Forms.ComboBox();
             this.btnFrequencies = new System.Windows.Forms.Button();
-            this.chkReadFile = new System.Windows.Forms.CheckBox();
             this.btnAnalyse = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform0)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWaveform1)).BeginInit();
@@ -75,7 +74,7 @@
             // picWaveform2
             // 
             this.picWaveform2.BackColor = System.Drawing.Color.White;
-            this.picWaveform2.Location = new System.Drawing.Point(12, 282);
+            this.picWaveform2.Location = new System.Drawing.Point(12, 246);
             this.picWaveform2.Name = "picWaveform2";
             this.picWaveform2.Size = new System.Drawing.Size(400, 200);
             this.picWaveform2.TabIndex = 5;
@@ -85,7 +84,7 @@
             // picWaveform3
             // 
             this.picWaveform3.BackColor = System.Drawing.Color.White;
-            this.picWaveform3.Location = new System.Drawing.Point(419, 282);
+            this.picWaveform3.Location = new System.Drawing.Point(419, 246);
             this.picWaveform3.Name = "picWaveform3";
             this.picWaveform3.Size = new System.Drawing.Size(400, 200);
             this.picWaveform3.TabIndex = 5;
@@ -97,34 +96,23 @@
             this.boxDevice.FormattingEnabled = true;
             this.boxDevice.Location = new System.Drawing.Point(89, 13);
             this.boxDevice.Name = "boxDevice";
-            this.boxDevice.Size = new System.Drawing.Size(323, 21);
+            this.boxDevice.Size = new System.Drawing.Size(730, 21);
             this.boxDevice.TabIndex = 2;
             this.boxDevice.SelectedIndexChanged += new System.EventHandler(this.boxDevice_SelectedIndexChanged);
             // 
             // btnFrequencies
             // 
-            this.btnFrequencies.Location = new System.Drawing.Point(12, 488);
+            this.btnFrequencies.Location = new System.Drawing.Point(12, 452);
             this.btnFrequencies.Name = "btnFrequencies";
-            this.btnFrequencies.Size = new System.Drawing.Size(400, 28);
+            this.btnFrequencies.Size = new System.Drawing.Size(400, 53);
             this.btnFrequencies.TabIndex = 7;
             this.btnFrequencies.Text = "Test Frequencies";
             this.btnFrequencies.UseVisualStyleBackColor = true;
             this.btnFrequencies.Click += new System.EventHandler(this.btnFrequencies_Click);
             // 
-            // chkReadFile
-            // 
-            this.chkReadFile.AutoSize = true;
-            this.chkReadFile.Location = new System.Drawing.Point(12, 524);
-            this.chkReadFile.Name = "chkReadFile";
-            this.chkReadFile.Size = new System.Drawing.Size(97, 17);
-            this.chkReadFile.TabIndex = 8;
-            this.chkReadFile.Text = "Read From File";
-            this.chkReadFile.UseVisualStyleBackColor = true;
-            this.chkReadFile.CheckedChanged += new System.EventHandler(this.chkReadFile_CheckedChanged);
-            // 
             // btnAnalyse
             // 
-            this.btnAnalyse.Location = new System.Drawing.Point(419, 488);
+            this.btnAnalyse.Location = new System.Drawing.Point(419, 452);
             this.btnAnalyse.Name = "btnAnalyse";
             this.btnAnalyse.Size = new System.Drawing.Size(400, 53);
             this.btnAnalyse.TabIndex = 9;
@@ -136,9 +124,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(832, 553);
+            this.ClientSize = new System.Drawing.Size(832, 516);
             this.Controls.Add(this.btnAnalyse);
-            this.Controls.Add(this.chkReadFile);
             this.Controls.Add(this.btnFrequencies);
             this.Controls.Add(this.picWaveform3);
             this.Controls.Add(this.picWaveform2);
@@ -166,7 +153,6 @@
         private System.Windows.Forms.PictureBox picWaveform3;
         private System.Windows.Forms.ComboBox boxDevice;
         private System.Windows.Forms.Button btnFrequencies;
-        private System.Windows.Forms.CheckBox chkReadFile;
         private System.Windows.Forms.Button btnAnalyse;
     }
 }
